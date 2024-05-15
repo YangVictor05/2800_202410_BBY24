@@ -114,3 +114,12 @@ app.post('/submitLogin', async (req, res) => {
         }
     }
 });
+
+//Events skeleton
+app.get('/events', (req, res) => {
+    // Check if user is logged in from the session
+    const loggedIn = req.session.authenticated;
+    // Render the homepage template with the loggedIn status
+    res.render('pages/events', { loggedIn });
+
+});

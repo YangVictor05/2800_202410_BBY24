@@ -80,4 +80,30 @@ body {
     flex-grow: 1; /* Ensures it takes up any remaining space */
 }
 
+/* Css for the footer */
+footer {
+    border-left: 0px;
+    border-right: 0px;
+    border-bottom: 0px;
+}
 
+#footer {
+    display: flex;
+    justify-content: space-around;
+    background-color: #2A8386;
+    overflow: hidden;
+    position: fixed;
+    border-style: solid;
+    border-color: #8FCCCE;
+    bottom: 0;
+    width: 100%;
+}
+#footer a {
+    float: left;
+    display: block;
+    color: #8FCCCE;
+    text-align: center;
+    padding: 12px 14px;
+    text-decoration: none;
+    font-size: 28px;
+}
