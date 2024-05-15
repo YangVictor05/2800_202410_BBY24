@@ -1,0 +1,51 @@
+* {
+  font-family: "Quicksand", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 600;
+  font-size: medium;
+  font-style: normal;
+}
+
+.bg {
+  background-size: 100% 100vh; 
+  background-size: auto 100%;
+  background-attachment: fixed;
+  background-position: center top; 
+}
+
+.container {
+  display: grid;
+  justify-items: center;
+}
+
+.logo {
+  width: 50%;
+  margin-top: 50px;
+
+}
+
+.signup { 
+  color: #ffffff;
+  background-color: transparent;
+  border-color: #ffffff;
+  /* padding: 10px 15px 10px 15px; */
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  border-style: solid;
+  align-self: center;
+  align-items: center;
+  justify-content: center;
+  width: 50%;
+  height: 45px;
+  margin-bottom: 15px;
+}
+
+.login { 
+  background-color: #f8f9fa;
+  color: #2A8386;
+  border-radius: 10px;
+  border-width: 0px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  width: 50%;
+  height: 45px;
+}
