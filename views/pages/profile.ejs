@@ -1,0 +1,13 @@
+<%- include("../partials/header_after") %> 
+<h1>Edit Profile</h1>
+<form action="/updateProfile" method="post">
+    <p>Name: <%= name %></p>
+    <p>Email: <%= email %></p>
+    <p>Age: <%= age %></p>
+    <div class="form-group">
+        <label for="biography">Biography:</label>
+        <textarea name="biography" class="form-control" id="biography" rows="3"><%= biography ? biography : '' %></textarea>
+    </div>
+    <button type="submit" class="btn btn-primary">Update Profile</button>
+</form>
+
