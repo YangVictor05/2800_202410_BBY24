@@ -7,7 +7,6 @@
 }
 
 .bg {
-  background-size: 100% 100vh; 
   background-size: auto 100%;
   background-attachment: fixed;
   background-position: center top; 
@@ -20,15 +19,13 @@
 
 .logo {
   width: 50%;
-  margin-top: 50px;
-
+  margin-top: 25%;
 }
 
 .signup { 
   color: #ffffff;
   background-color: transparent;
   border-color: #ffffff;
-  /* padding: 10px 15px 10px 15px; */
   border-radius: 10px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   border-style: solid;
@@ -48,4 +45,45 @@
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   width: 50%;
   height: 45px;
+}
+
+
+
+@media only screen and (min-width: 376px) {
+  .logo {
+    width: 50%;
+    margin-top: 25%;
+  }
+}
+
+@media only screen and (max-width: 375px) {
+  .logo {
+    width: 50%;
+    margin-top: 15%;
+  }
+}
+
+@media only screen and (min-width: 431px) {
+  .logo {
+    width: 180px;
+    margin-top: 70px;
+  }
+
+  .signup { 
+    width: 180px;
+    height: 45px;
+    margin-bottom: 15px;
+  }
+  
+  .login { 
+    width: 180px;
+    height: 45px;
+  }
+
+  .bg {
+    background-size: 100% auto;
+    background-attachment: fixed;
+    background-position: 50% 70%; 
+    background-repeat: no-repeat;
+  }
 }
