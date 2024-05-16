@@ -118,3 +118,6 @@ footer {
     padding-bottom: 1vh;
     width: 22px;
 }
+.active {
+    color: white;
+}

@@ -140,7 +140,7 @@ app.post('/submitLogin', async (req, res) => {
             //res.redirect('/memberpage/');
 			res.send("login success")
         } else {
-            console.log('worng password.');
+            console.log('wrong password.');
             //res.redirect('/loginError');
 			res.send("login error")
         }
@@ -152,6 +152,6 @@ app.get('/events', (req, res) => {
     // Check if user is logged in from the session
     const loggedIn = req.session.authenticated;
     // Render the homepage template with the loggedIn status
-    res.render('pages/events', { loggedIn });
+    res.render('pages/events', { loggedIn, currentPath: req.path });
 
 });
