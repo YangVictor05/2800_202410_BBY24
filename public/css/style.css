@@ -51,7 +51,7 @@ body {
     display: block;
     position: relative;
     left:10px;
-    padding-top: 17px;
+    padding-top: 13px;
     font-size: 25px; /* Adjust the font size as per your design */
     color: white; /* Sets the color of the icon */
 }
@@ -120,4 +120,16 @@ footer {
 }
 .active {
     color: white;
+}
+.logout_button{
+    display: block;
+    position: absolute;  /* Changed from 'relative' to 'absolute' */
+    right: 10px;         /* Adjust as needed to control distance from the right edge */
+    top: 10px;           /* Adjust as needed to control distance from the top */
+    padding-top: 1px;    /* Reduced padding to make the button appear smaller */
+    padding-right: 1x;  /* You can adjust padding on all sides as needed */
+    padding-bottom: 1px;
+    padding-left: 1px;
+    transform: scale(0.7);
+    cursor: pointer;
 }

@@ -52,12 +52,24 @@ app.listen(port, () => {
     console.log("Node application listening on port " + port);
 });
 
-//Home Page
+//Landing page 
 app.get('/', (req, res) => {
+   
+    res.render('pages/landing');
+
+});
+
+//Home Page
+app.get('/home', (req, res) => {
     // Check if user is logged in from the session
     const loggedIn = req.session.authenticated;
+    if (loggedIn){
+        res.render('pages/index', {name: req.session.name});
+    }else{
+        res.render('pages/landing');
+    }
     // Render the homepage template with the loggedIn status
-    res.render('pages/index', { loggedIn });
+    
 
 });
 
@@ -90,7 +102,8 @@ app.post('/signupSubmit', async (req, res) => {
     req.session.authenticated = true;
     req.session.name = name;
     req.session.cookie.maxAge = expireTime;
-    res.send("create user success")
+    res.redirect('/home');
+    //res.send("create user success")
 });
 
 //Login Page
@@ -137,14 +150,27 @@ app.post('/submitLogin', async (req, res) => {
             req.session.name = result.name;
             req.session.user_type = result.user_type;
             req.session.cookie.maxAge = expireTime;
-            //res.redirect('/memberpage/');
-			res.send("login success")
+            res.redirect('/home');
+			//res.send("login success")
         } else {
             console.log('wrong password.');
             //res.redirect('/loginError');
 			res.send("login error")
         }
     }
+});
+
+//signout
+app.get('/signout', function (req, res) {
+    req.session.destroy(function (err) {
+        if (err) {
+            console.log(err);
+            res.send("Error signing out");
+        } else {
+            let loggedIn = false;
+            res.render('pages/landing'); 
+        }
+    });
 });
 
 //Events skeleton
