@@ -61,6 +61,38 @@ app.get('/', (req, res) => {
 
 });
 
+//Sign Up
+app.get('/signup', (req, res) => {
+    res.render('pages/signup');
+});
+
+app.post('/signupSubmit', async (req, res) => {
+
+    const { name, email, password } = req.body;
+    const schema = Joi.object(
+        {
+            name: Joi.string().alphanum().max(20).required(),
+            email: Joi.string().max(20).required(),
+            password: Joi.string().max(20).required()
+        });
+
+    const validationResult = schema.validate({ name, email, password });
+
+    if (validationResult.error != null) {
+        console.log(validationResult.error);
+        res.redirect("/signup");
+        return;
+    }
+
+    var hashedPassword = await bcrypt.hash(password, saltRounds);
+    //Set the session as authenticated, Store the user's name in the session for future use and Set the expiration time of the session cookie
+    await userCollection.insertOne({ name: name, email: email, password: hashedPassword, user_type: "user"});
+    req.session.authenticated = true;
+    req.session.name = name;
+    req.session.cookie.maxAge = expireTime;
+    res.send("create user success")
+});
+
 //Login Page
 app.get('/login', (req, res) => {
     const missingCredentials = req.query.missing;
@@ -99,7 +131,7 @@ app.post('/submitLogin', async (req, res) => {
         //res.redirect('/loginError');
 		res.send("login error")
     } else {
-        if (password==result.password) {
+        if (await bcrypt.compare(password, result.password)) {
             console.log("correct password");
             req.session.authenticated = true;
             req.session.name = result.name;
