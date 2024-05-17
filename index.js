@@ -1,5 +1,26 @@
+const firebase = require('firebase/app');
+require('firebase/storage'); // If you're using Firebase Storage
+
+// Then initialize Firebase with your configuration
+const firebaseConfig = {
+    apiKey: "AIzaSyDsoIadKRYNUrq_4tKIjRleaTR-UpGabzs",
+    authDomain: "bby24-c12c5.firebaseapp.com",
+    projectId: "bby24-c12c5",
+    storageBucket: "bby24-c12c5.appspot.com",
+    messagingSenderId: "790246092587",
+    appId: "1:790246092587:web:f59b7ffe6e1b3b83ba1f6e"
+  };
+
+firebase.initializeApp(firebaseConfig);
+
+
 require("./utils.js");
 require('dotenv').config();
+require('firebase/storage');
+
+
+
+
 const express = require('express');
 const session = require('express-session');
 const MongoStore = require('connect-mongo');
@@ -203,6 +224,20 @@ app.get('/profile', async (req, res) => {
     }
 });
 
+app.get('/editUserProfile', (req, res) => {
+    if (!req.session.authenticated) {
+        res.redirect('/login');
+        return;
+    }
+
+    // Render the edit user profile page
+    res.render('pages/editUserProfile', {
+        name: req.session.name,
+        email: req.session.email,
+        age: req.session.age,
+        biography: req.session.biography || '' 
+    });
+});
 
 
 //Edit Profile
@@ -212,19 +247,24 @@ app.post('/updateProfile', async (req, res) => {
         return;
     }
 
-    const { biography } = req.body;
+    const { name, age, biography } = req.body;
     try {
         await userCollection.updateOne(
-            { email: req.session.email }, // use email to identify the user document
-            { $set: { biography: biography } }
+            { email: req.session.email },
+            { $set: { name: name, age: age, biography: biography } }
         );
-        req.session.biography = biography; // Update session with new biography
-        res.redirect('/profile');
+        // Update session variables
+        req.session.name = name;
+        req.session.age = age;
+        req.session.biography = biography;
+        res.redirect('/profile');  // Redirect to the profile page after update
     } catch (error) {
         console.error('Error updating user profile:', error);
         res.send("Failed to update profile.");
     }
 });
+
+
 
 //signout
 app.get('/signout', function (req, res) {
