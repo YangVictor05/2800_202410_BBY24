@@ -1,5 +1,41 @@
+/*const firebase = require('firebase/app');
+require('firebase/storage'); // If you're using Firebase Storage
+const admin = require('firebase-admin');
+const serviceAccount = require('./path/to/serviceAccountKey.json');
+
+const firebaseConfig = {
+    apiKey: "AIzaSyDsoIadKRYNUrq_4tKIjRleaTR-UpGabzs",
+    authDomain: "bby24-c12c5.firebaseapp.com",
+    projectId: "bby24-c12c5",
+    storageBucket: "bby24-c12c5.appspot.com",
+    messagingSenderId: "790246092587",
+    appId: "1:790246092587:web:f59b7ffe6e1b3b83ba1f6e"
+  };
+
+firebase.initializeApp(firebaseConfig);
+
+admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount),
+    storageBucket: "bby24-c12c5.appspot.com"
+});
+
+var admin = require("firebase-admin");
+
+var serviceAccount = require("path/to/serviceAccountKey.json");
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount)
+});
+
+const bucket = admin.storage().bucket(); */
+
 require("./utils.js");
 require('dotenv').config();
+require('firebase/storage');
+
+
+const multer = require('multer');
+const upload = multer({ storage: multer.memoryStorage() });
 const express = require('express');
 const session = require('express-session');
 const MongoStore = require('connect-mongo');
@@ -271,7 +307,8 @@ app.post('/submitLogin', async (req, res) => {
 	console.log(req.body);
     const { email, password } = req.body;
 
-    const schema = Joi.string().max(20).required();
+    //const schema = Joi.string().max(20).required();
+    const schema = Joi.string().email().required();
     const validationResult = schema.validate(email);
     if (validationResult.error != null) {
         console.log(validationResult.error);
@@ -279,14 +316,20 @@ app.post('/submitLogin', async (req, res) => {
         return;
     }
 
-    const query = { email: email };
-    const options = {
+    // const query = { email: email };
+    // const options = {
         // Sort matched documents in descending order by rating
-        sort: { "name": -1 },
+        // sort: { "name": -1 },
         // Include only the `title` and `imdb` fields in the returned document
-        projection: { name: 1, password: 1, user_type: 1, _id: 1 },
-    };
-    const result = await userCollection.findOne(query, options);
+       // projection: { name: 1, password: 1, user_type: 1, _id: 1 },
+    // };
+    // const result = await userCollection.findOne(query, options);
+
+    const result = await userCollection.findOne({ email: email });
+    console.log("Fetched user:", result);
+    if (result) {
+        console.log("Email from DB:", result.email);
+    }
 
     if (result === null) {
         console.log('No document matches the provided query.');
@@ -302,6 +345,7 @@ app.post('/submitLogin', async (req, res) => {
             req.session.biography = result.biography;
             req.session.user_type = result.user_type;
             req.session.cookie.maxAge = expireTime;
+            console.log("Session email set to:", req.session.email)
             res.redirect('/home');
 			//res.send("login success")
         } else {
@@ -319,27 +363,42 @@ app.get('/profile', async (req, res) => {
         return;
     }
 
+    console.log("Fetching profile for email:", req.session.email);  // Debugging output
+
     try {
-        // Fetch the complete user profile from the database
-        console.log("Looking for user with email:", req.session.email);
         const userProfile = await userCollection.findOne({ email: req.session.email });
         if (!userProfile) {
-            console.log('User profile not found.');
-            res.send("Profile not found");
+            console.log('User profile not found for email:', req.session.email);
+            res.status(404).send("Profile not found");  // More appropriate HTTP status code for not found
             return;
         }
 
-        // Ensure userProfile is defined and use the properties directly
         res.render('pages/profile', {
             name: userProfile.name,
             email: userProfile.email,
             age: userProfile.age,
-            biography: userProfile.biography || '' // Provide an empty string if biography is undefined
+            biography: userProfile.biography || '',  // Provide an empty string if biography is undefined
+            profilePicUrl: userProfile.profilePicUrl || '/img/default-profile.png' // Default profile picture
         });
     } catch (error) {
         console.error('Error fetching user profile:', error);
-        res.send("Failed to fetch profile.");
+        res.status(500).send("Failed to fetch profile.");  // Internal Server Error for unexpected issues
     }
+});
+
+app.get('/editUserProfile', (req, res) => {
+    if (!req.session.authenticated) {
+        res.redirect('/login');
+        return;
+    }
+
+    // Render the edit user profile page
+    res.render('pages/editUserProfile', {
+        name: req.session.name,
+        email: req.session.email,
+        age: req.session.age,
+        biography: req.session.biography || '' 
+    });
 });
 
 
@@ -350,18 +409,56 @@ app.post('/updateProfile', async (req, res) => {
         return;
     }
 
-    const { biography } = req.body;
+    const { name, age, biography } = req.body;
     try {
         await userCollection.updateOne(
-            { email: req.session.email }, // use email to identify the user document
-            { $set: { biography: biography } }
+            { email: req.session.email },
+            { $set: { name: name, age: age, biography: biography } }
         );
-        req.session.biography = biography; // Update session with new biography
-        res.redirect('/profile');
+        // Update session variables
+        req.session.name = name;
+        req.session.age = age;
+        req.session.biography = biography;
+        res.redirect('/profile');  // Redirect to the profile page after update
     } catch (error) {
         console.error('Error updating user profile:', error);
         res.send("Failed to update profile.");
     }
+});
+
+app.post('/uploadProfilePicture', upload.single('profilePic'), async (req, res) => {
+    if (!req.session.authenticated) {
+        res.redirect('/login');
+        return;
+    }
+
+    if (!req.file) {
+        return res.status(400).send('No file uploaded.');
+    }
+
+    const blob = bucket.file(`profile-pictures/${Date.now()}-${req.file.originalname}`);
+    const blobStream = blob.createWriteStream({
+        metadata: {
+            contentType: req.file.mimetype
+        }
+    });
+
+    blobStream.on('error', (error) => {
+        console.error('Error uploading file to Firebase Storage:', error);
+        res.status(500).send('Unable to upload at the moment.');
+    });
+
+    blobStream.on('finish', async () => {
+        const publicUrl = `https://storage.googleapis.com/${bucket.name}/${blob.name}`;
+        await userCollection.updateOne(
+            { email: req.session.email },
+            { $set: { profilePicUrl: publicUrl } }
+        );
+        req.session.profilePicUrl = publicUrl;
+        res.redirect('/profile');
+    });
+
+    blobStream.end(req.file.buffer);
 });
 
 //signout
