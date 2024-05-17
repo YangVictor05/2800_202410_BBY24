@@ -1,7 +1,8 @@
-const firebase = require('firebase/app');
+/*const firebase = require('firebase/app');
 require('firebase/storage'); // If you're using Firebase Storage
+const admin = require('firebase-admin');
+const serviceAccount = require('./path/to/serviceAccountKey.json');
 
-// Then initialize Firebase with your configuration
 const firebaseConfig = {
     apiKey: "AIzaSyDsoIadKRYNUrq_4tKIjRleaTR-UpGabzs",
     authDomain: "bby24-c12c5.firebaseapp.com",
@@ -13,14 +14,28 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 
+admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount),
+    storageBucket: "bby24-c12c5.appspot.com"
+});
+
+var admin = require("firebase-admin");
+
+var serviceAccount = require("path/to/serviceAccountKey.json");
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount)
+});
+
+const bucket = admin.storage().bucket(); */
 
 require("./utils.js");
 require('dotenv').config();
 require('firebase/storage');
 
 
-
-
+const multer = require('multer');
+const upload = multer({ storage: multer.memoryStorage() });
 const express = require('express');
 const session = require('express-session');
 const MongoStore = require('connect-mongo');
@@ -216,7 +231,8 @@ app.get('/profile', async (req, res) => {
             name: userProfile.name,
             email: userProfile.email,
             age: userProfile.age,
-            biography: userProfile.biography || ''  // Provide an empty string if biography is undefined
+            biography: userProfile.biography || '',  // Provide an empty string if biography is undefined
+            profilePicUrl: userProfile.profilePicUrl || '/img/default-profile.png' // Default profile picture
         });
     } catch (error) {
         console.error('Error fetching user profile:', error);
@@ -264,7 +280,40 @@ app.post('/updateProfile', async (req, res) => {
     }
 });
 
+app.post('/uploadProfilePicture', upload.single('profilePic'), async (req, res) => {
+    if (!req.session.authenticated) {
+        res.redirect('/login');
+        return;
+    }
 
+    if (!req.file) {
+        return res.status(400).send('No file uploaded.');
+    }
+
+    const blob = bucket.file(`profile-pictures/${Date.now()}-${req.file.originalname}`);
+    const blobStream = blob.createWriteStream({
+        metadata: {
+            contentType: req.file.mimetype
+        }
+    });
+
+    blobStream.on('error', (error) => {
+        console.error('Error uploading file to Firebase Storage:', error);
+        res.status(500).send('Unable to upload at the moment.');
+    });
+
+    blobStream.on('finish', async () => {
+        const publicUrl = `https://storage.googleapis.com/${bucket.name}/${blob.name}`;
+        await userCollection.updateOne(
+            { email: req.session.email },
+            { $set: { profilePicUrl: publicUrl } }
+        );
+        req.session.profilePicUrl = publicUrl;
+        res.redirect('/profile');
+    });
+
+    blobStream.end(req.file.buffer);
+});
 
 //signout
 app.get('/signout', function (req, res) {
