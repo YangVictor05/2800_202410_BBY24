@@ -4,6 +4,11 @@ const express = require('express');
 const session = require('express-session');
 const MongoStore = require('connect-mongo');
 const bcrypt = require('bcrypt');
+const { ObjectId } = require('mongodb');
+
+// JWT Setup
+const jwt = require("jsonwebtoken");
+const JWT_SECRET = process.env.JWT_SECRET;
 
 const saltRounds = 12;
 
@@ -33,6 +38,147 @@ var mongoStore = MongoStore.create({
 		secret: mongodb_session_secret
 	}
 })
+
+//Set up mailing service
+const nodemailer = require('nodemailer')
+const { google } = require('googleapis')
+// const config = require('./config.js')
+const OAuth2 = google.auth.OAuth2
+
+const OAuth2_client = new OAuth2(process.env.EMAIL_CLIENT_ID, process.env.EMAIL_CLIENT_SECRET)
+OAuth2_client.setCredentials( { refresh_token : process.env.EMAIL_REFRESH_TOKEN })
+
+function send_mail(name, recipient, text) {
+  const accessToken = OAuth2_client.getAccessToken()
+
+  const transport = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      type: 'OAuth2',
+      user: process.env.EMAIL_USER,
+      clientId: process.env.EMAIL_CLIENT_ID,
+      clientSecret: process.env.EMAIL_CLIENT_SECRET,
+      refreshToken: process.env.EMAIL_REFRESH_TOKEN,
+      accessToken: accessToken
+
+    }
+
+  })
+
+  const mail_options = {
+    from: 'LinkUp <${process.env.EMAIL_USER}>',
+    to: recipient,
+    subject: 'Reset LinkUp Password',
+    html: get_html_message(name, text)
+  }
+
+  transport.sendMail(mail_options, function (error, result) {
+    if (error) {
+      console.log('Error: ', error)
+    } else {
+      console.log('Success: ', result)
+    }
+    transport.close()
+
+  })
+
+}
+
+function get_html_message(name, text) {
+  return `
+  <p>Hi ${name}, </p>
+  <p> <a href="${text}">${text}</a> </p>
+  `
+}
+
+
+
+app.get('/reset', (req, res) => {
+    var message  = req.query.msg ? req.query.msg : '';
+    res.render('pages/forgot-password', {msg:message});
+
+});
+
+app.post('/forgot-password', async (req, res) => {
+    const { email } = req.body;
+
+    
+    try {
+        const oldUser = await userCollection.findOne({ email });
+        if (!oldUser) {
+            console.log("Use Not found");
+          return res.redirect("/reset?msg=This is not a valid email.");
+        }
+        const secret = JWT_SECRET + oldUser.password;
+        const token = jwt.sign({ email: oldUser.email, id: oldUser._id }, secret, {
+          expiresIn: "5m",
+        });
+        const link = `${process.env.HOST_URL}/reset-password/${oldUser._id}/${token}`;
+        
+
+        console.log(oldUser);
+
+        send_mail(oldUser.name, email, link);
+        return res.redirect("/reset?msg=An email to reset your password has been set to your inbox. Please check your email to proceed.");
+        
+        
+      } catch (error) {}
+});
+
+app.get("/reset-password/:id/:token", async (req, res) => {
+    const { id, token } = req.params;
+    console.log(req.params);
+    const allUserIds = await userCollection.find({}, { _id: 1 }).toArray();
+    console.log(allUserIds);
+    const userId = ObjectId(id);
+
+
+    const oldUser = await userCollection.findOne({ _id: userId });
+    if (!oldUser) {
+
+      return res.json({ status: "User Not Exists!!" });
+    }
+    const secret = JWT_SECRET + oldUser.password;
+    try {
+      const verify = jwt.verify(token, secret);
+      res.render('pages/reset-password', { email: verify.email, status: "Not verified" });
+    } catch (error) {
+      console.log(error);
+      res.send("Not Verified");
+    }
+  });
+  
+  app.post("/reset-password/:id/:token", async (req, res) => {
+    const { id, token } = req.params;
+    const { password } = req.body;
+
+    const userId = ObjectId(id);
+  
+    const oldUser = await userCollection.findOne({ _id: userId });
+    if (!oldUser) {
+      return res.json({ status: "User Not Exists!!" });
+    }
+    const secret = JWT_SECRET + oldUser.password;
+    try {
+      const verify = jwt.verify(token, secret);
+      const encryptedPassword = await bcrypt.hash(password, saltRounds);
+      await userCollection.updateOne(
+        {
+          _id: userId,
+        },
+        {
+          $set: {
+            password: encryptedPassword,
+          },
+        }
+      );
+  
+      res.render('pages/reset-password', { email: verify.email, status: "verified" });
+    } catch (error) {
+      console.log(error);
+      res.json({ status: "Something Went Wrong" });
+    }
+  });
 
 app.set('view engine', 'ejs');  // Set EJS as the templating engine
 app.set('views', './views'); // default path for EJS templates
