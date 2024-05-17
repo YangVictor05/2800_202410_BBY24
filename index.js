@@ -125,7 +125,8 @@ app.post('/submitLogin', async (req, res) => {
 	console.log(req.body);
     const { email, password } = req.body;
 
-    const schema = Joi.string().max(20).required();
+    //const schema = Joi.string().max(20).required();
+    const schema = Joi.string().email().required();
     const validationResult = schema.validate(email);
     if (validationResult.error != null) {
         console.log(validationResult.error);
@@ -133,14 +134,20 @@ app.post('/submitLogin', async (req, res) => {
         return;
     }
 
-    const query = { email: email };
-    const options = {
+    // const query = { email: email };
+    // const options = {
         // Sort matched documents in descending order by rating
-        sort: { "name": -1 },
+        // sort: { "name": -1 },
         // Include only the `title` and `imdb` fields in the returned document
-        projection: { name: 1, password: 1, user_type: 1, _id: 1 },
-    };
-    const result = await userCollection.findOne(query, options);
+       // projection: { name: 1, password: 1, user_type: 1, _id: 1 },
+    // };
+    // const result = await userCollection.findOne(query, options);
+
+    const result = await userCollection.findOne({ email: email });
+    console.log("Fetched user:", result);
+    if (result) {
+        console.log("Email from DB:", result.email);
+    }
 
     if (result === null) {
         console.log('No document matches the provided query.');
@@ -156,6 +163,7 @@ app.post('/submitLogin', async (req, res) => {
             req.session.biography = result.biography;
             req.session.user_type = result.user_type;
             req.session.cookie.maxAge = expireTime;
+            console.log("Session email set to:", req.session.email)
             res.redirect('/home');
 			//res.send("login success")
         } else {
@@ -173,28 +181,28 @@ app.get('/profile', async (req, res) => {
         return;
     }
 
+    console.log("Fetching profile for email:", req.session.email);  // Debugging output
+
     try {
-        // Fetch the complete user profile from the database
-        console.log("Looking for user with email:", req.session.email);
         const userProfile = await userCollection.findOne({ email: req.session.email });
         if (!userProfile) {
-            console.log('User profile not found.');
-            res.send("Profile not found");
+            console.log('User profile not found for email:', req.session.email);
+            res.status(404).send("Profile not found");  // More appropriate HTTP status code for not found
             return;
         }
 
-        // Ensure userProfile is defined and use the properties directly
         res.render('pages/profile', {
             name: userProfile.name,
             email: userProfile.email,
             age: userProfile.age,
-            biography: userProfile.biography || '' // Provide an empty string if biography is undefined
+            biography: userProfile.biography || ''  // Provide an empty string if biography is undefined
         });
     } catch (error) {
         console.error('Error fetching user profile:', error);
-        res.send("Failed to fetch profile.");
+        res.status(500).send("Failed to fetch profile.");  // Internal Server Error for unexpected issues
     }
 });
+
 
 
 //Edit Profile
