@@ -226,15 +226,16 @@ app.get('/signup', (req, res) => {
 
 app.post('/signupSubmit', async (req, res) => {
 
-    const { name, email, password } = req.body;
+    const { name, email, password, age } = req.body;
     const schema = Joi.object(
         {
             name: Joi.string().alphanum().max(20).required(),
             email: Joi.string().max(20).required(),
-            password: Joi.string().max(20).required()
+            password: Joi.string().max(20).required(),
+            age: Joi.number().integer().min(1).max(120).required()
         });
 
-    const validationResult = schema.validate({ name, email, password });
+    const validationResult = schema.validate({ name, email, password, age });
 
     if (validationResult.error != null) {
         console.log(validationResult.error);
@@ -244,11 +245,13 @@ app.post('/signupSubmit', async (req, res) => {
 
     var hashedPassword = await bcrypt.hash(password, saltRounds);
     //Set the session as authenticated, Store the user's name in the session for future use and Set the expiration time of the session cookie
-    await userCollection.insertOne({ name: name, email: email, password: hashedPassword, user_type: "user"});
+    await userCollection.insertOne({ name: name, email: email, password: hashedPassword, age: age, user_type: "user"});
     req.session.authenticated = true;
     req.session.name = name;
+    req.session.age = age;
+    req.session.email = email;
     req.session.cookie.maxAge = expireTime;
-    res.redirect('/home');
+    res.redirect('/profile');
     //res.send("create user success")
 });
 
@@ -294,6 +297,9 @@ app.post('/submitLogin', async (req, res) => {
             console.log("correct password");
             req.session.authenticated = true;
             req.session.name = result.name;
+            req.session.age = result.age;
+            req.session.email = result.email;
+            req.session.biography = result.biography;
             req.session.user_type = result.user_type;
             req.session.cookie.maxAge = expireTime;
             res.redirect('/home');
@@ -303,6 +309,58 @@ app.post('/submitLogin', async (req, res) => {
             //res.redirect('/loginError');
 			res.send("login error")
         }
+    }
+});
+
+//Profiles page. 
+app.get('/profile', async (req, res) => {
+    if (!req.session.authenticated) {
+        res.redirect('/login');
+        return;
+    }
+
+    try {
+        // Fetch the complete user profile from the database
+        console.log("Looking for user with email:", req.session.email);
+        const userProfile = await userCollection.findOne({ email: req.session.email });
+        if (!userProfile) {
+            console.log('User profile not found.');
+            res.send("Profile not found");
+            return;
+        }
+
+        // Ensure userProfile is defined and use the properties directly
+        res.render('pages/profile', {
+            name: userProfile.name,
+            email: userProfile.email,
+            age: userProfile.age,
+            biography: userProfile.biography || '' // Provide an empty string if biography is undefined
+        });
+    } catch (error) {
+        console.error('Error fetching user profile:', error);
+        res.send("Failed to fetch profile.");
+    }
+});
+
+
+//Edit Profile
+app.post('/updateProfile', async (req, res) => {
+    if (!req.session.authenticated) {
+        res.redirect('/login');
+        return;
+    }
+
+    const { biography } = req.body;
+    try {
+        await userCollection.updateOne(
+            { email: req.session.email }, // use email to identify the user document
+            { $set: { biography: biography } }
+        );
+        req.session.biography = biography; // Update session with new biography
+        res.redirect('/profile');
+    } catch (error) {
+        console.error('Error updating user profile:', error);
+        res.send("Failed to update profile.");
     }
 });
 
