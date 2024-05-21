@@ -19,23 +19,15 @@ admin.initializeApp({
     storageBucket: "bby24-c12c5.appspot.com"
 });
 
-var admin = require("firebase-admin");
-
-var serviceAccount = require("path/to/serviceAccountKey.json");
-
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount)
-});
-
 const bucket = admin.storage().bucket(); */
 
 require("./utils.js");
 require('dotenv').config();
-require('firebase/storage');
+//require('firebase/storage');
 
 
-const multer = require('multer');
-const upload = multer({ storage: multer.memoryStorage() });
+//const multer = require('multer');
+//const upload = multer({ storage: multer.memoryStorage() });
 const express = require('express');
 const session = require('express-session');
 const MongoStore = require('connect-mongo');
@@ -55,7 +47,7 @@ const app = express();
 const Joi = require("joi");
 const expireTime = 1 * 60 * 60 * 1000; //expires after 1 hour  (minutes * seconds * millis)
 
-// database setup
+// Mongodb setup
 const mongodb_host = process.env.MONGODB_HOST;
 const mongodb_user = process.env.MONGODB_USER;
 const mongodb_password = process.env.MONGODB_PASSWORD;
@@ -74,6 +66,25 @@ var mongoStore = MongoStore.create({
 		secret: mongodb_session_secret
 	}
 })
+
+app.set('view engine', 'ejs');  // Set EJS as the templating engine
+app.set('views', './views'); // default path for EJS templates
+
+app.use(session({
+    secret: node_session_secret,
+    store: mongoStore, //default is memory store 
+    saveUninitialized: false,
+    resave: true
+}
+));
+
+app.use('/img', express.static(__dirname + '/public/img'));
+app.use('/css', express.static(__dirname + '/public/css'));
+
+app.listen(port, () => {
+    console.log("Node application listening on port " + port);
+});
+
 
 //Set up mailing service
 const nodemailer = require('nodemailer')
@@ -216,23 +227,6 @@ app.get("/reset-password/:id/:token", async (req, res) => {
     }
   });
 
-app.set('view engine', 'ejs');  // Set EJS as the templating engine
-app.set('views', './views'); // default path for EJS templates
-
-app.use(session({
-    secret: node_session_secret,
-    store: mongoStore, //default is memory store 
-    saveUninitialized: false,
-    resave: true
-}
-));
-
-app.use('/img', express.static(__dirname + '/public/img'));
-app.use('/css', express.static(__dirname + '/public/css'));
-
-app.listen(port, () => {
-    console.log("Node application listening on port " + port);
-});
 
 //Landing page 
 app.get('/', (req, res) => {
@@ -426,40 +420,40 @@ app.post('/updateProfile', async (req, res) => {
     }
 });
 
-app.post('/uploadProfilePicture', upload.single('profilePic'), async (req, res) => {
-    if (!req.session.authenticated) {
-        res.redirect('/login');
-        return;
-    }
+// app.post('/uploadProfilePicture', upload.single('profilePic'), async (req, res) => {
+//     if (!req.session.authenticated) {
+//         res.redirect('/login');
+//         return;
+//     }
 
-    if (!req.file) {
-        return res.status(400).send('No file uploaded.');
-    }
+//     if (!req.file) {
+//         return res.status(400).send('No file uploaded.');
+//     }
 
-    const blob = bucket.file(`profile-pictures/${Date.now()}-${req.file.originalname}`);
-    const blobStream = blob.createWriteStream({
-        metadata: {
-            contentType: req.file.mimetype
-        }
-    });
+//     const blob = bucket.file(`profile-pictures/${Date.now()}-${req.file.originalname}`);
+//     const blobStream = blob.createWriteStream({
+//         metadata: {
+//             contentType: req.file.mimetype
+//         }
+//     });
 
-    blobStream.on('error', (error) => {
-        console.error('Error uploading file to Firebase Storage:', error);
-        res.status(500).send('Unable to upload at the moment.');
-    });
+//     blobStream.on('error', (error) => {
+//         console.error('Error uploading file to Firebase Storage:', error);
+//         res.status(500).send('Unable to upload at the moment.');
+//     });
 
-    blobStream.on('finish', async () => {
-        const publicUrl = `https://storage.googleapis.com/${bucket.name}/${blob.name}`;
-        await userCollection.updateOne(
-            { email: req.session.email },
-            { $set: { profilePicUrl: publicUrl } }
-        );
-        req.session.profilePicUrl = publicUrl;
-        res.redirect('/profile');
-    });
+//     blobStream.on('finish', async () => {
+//         const publicUrl = `https://storage.googleapis.com/${bucket.name}/${blob.name}`;
+//         await userCollection.updateOne(
+//             { email: req.session.email },
+//             { $set: { profilePicUrl: publicUrl } }
+//         );
+//         req.session.profilePicUrl = publicUrl;
+//         res.redirect('/profile');
+//     });
 
-    blobStream.end(req.file.buffer);
-});
+//     blobStream.end(req.file.buffer);
+// });
 
 //signout
 app.get('/signout', function (req, res) {
