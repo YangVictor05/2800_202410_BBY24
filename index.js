@@ -229,8 +229,6 @@ app.get('/', (req, res) => {
 });
 
 //Home Page
-app.get('/home', (req, res) => {
-  // Check if user is logged in from the session
 app.get('/home', async(req, res) => {
 
   const loggedIn = req.session.authenticated;
@@ -250,9 +248,6 @@ app.get('/home', async(req, res) => {
   } else {
     res.render('pages/landing');
   }
-  // Render the homepage template with the loggedIn status
-
-
 });
 
 //Sign Up
