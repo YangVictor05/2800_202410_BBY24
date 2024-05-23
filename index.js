@@ -480,7 +480,7 @@ app.get('/events', (req, res) => {
   // Render the homepage template with the loggedIn status
   res.render('pages/events', { loggedIn, currentPath: req.path });
 
-});});});
+});
 
 app.get('/matching', async (req, res) => {
   if (!req.session.authenticated) {
