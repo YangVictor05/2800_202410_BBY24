@@ -228,7 +228,6 @@ app.get('/', (req, res) => {
 });
 
 //Home Page
-<<<<<<< HEAD
 app.get('/home', async (req, res) => {
   const loggedIn = req.session.authenticated;
   if (loggedIn) {
@@ -247,22 +246,6 @@ app.get('/home', async (req, res) => {
       console.log("matchuser_email is not an array or user not found");
       res.render('pages/index', { loggedIn, username: req.session.name, users: [], currentPath: req.path });
     }
-=======
-app.get('/home', async(req, res) => {
-
-  const loggedIn = req.session.authenticated;
-  if (loggedIn) {
-      const userEmail = req.session.email;
-      console.log(userEmail);
-      const query = { email: userEmail };
-      const user = await matchuserCollection.findOne(query);
-      const save = user.matchuser_email;
-      const querysave = { email: { $in: save } };
-      const saveuser = await userCollection.find(querysave).toArray();
-      console.log("==============================");
-      console.log(req.session.name);
-      res.render('pages/index', {loggedIn, username:req.session.name, users: saveuser, currentPath: req.path });
->>>>>>> 4c3fe94e3e2c070fabfc6ba0b1d6a3483a5acc98
   } else {
     res.render('pages/landing');
   }
@@ -293,12 +276,7 @@ app.post('/signupSubmit', async (req, res) => {
   var hashedPassword = await bcrypt.hash(password, saltRounds);
 
   await userCollection.insertOne({ name: name, email: email, password: hashedPassword, age: age, user_type: "user" });
-<<<<<<< HEAD
   await matchuserCollection.insertOne({ name: name, email: email, matchuser_email: [] });
-=======
-  
-  await matchuserCollection.insertOne({ name: name, email: email});   
->>>>>>> 4c3fe94e3e2c070fabfc6ba0b1d6a3483a5acc98
 
   req.session.authenticated = true;
   req.session.name = name;
@@ -333,10 +311,7 @@ app.post('/submitLogin', async (req, res) => {
     return;
   }
 
-<<<<<<< HEAD
-=======
 
->>>>>>> 4c3fe94e3e2c070fabfc6ba0b1d6a3483a5acc98
   const result = await userCollection.findOne({ email: email });
   console.log("Fetched user:", result);
   if (result) {
