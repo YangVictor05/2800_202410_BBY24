@@ -48,7 +48,6 @@ const node_session_secret = process.env.NODE_SESSION_SECRET;
 
 var { database } = include('databaseConnection');
 const userCollection = database.db(mongodb_database).collection('users');
-app.use(express.urlencoded({ extended: false }));
 const matchuserCollection = database.db(mongodb_database).collection('matchuser');
 
 app.use(express.urlencoded({ extended: false }));
@@ -229,13 +228,10 @@ app.get('/', (req, res) => {
 });
 
 //Home Page
-app.get('/home', (req, res) => {
-  // Check if user is logged in from the session
 app.get('/home', async(req, res) => {
 
   const loggedIn = req.session.authenticated;
   if (loggedIn) {
-    res.render('pages/index', { name: req.session.name });
 
       const userEmail = req.session.email;
       console.log(userEmail);
@@ -250,9 +246,6 @@ app.get('/home', async(req, res) => {
   } else {
     res.render('pages/landing');
   }
-  // Render the homepage template with the loggedIn status
-
-
 });
 
 //Sign Up
@@ -330,15 +323,6 @@ app.post('/submitLogin', async (req, res) => {
     res.redirect("/login");
     return;
   }
-
-  // const query = { email: email };
-  // const options = {
-  // Sort matched documents in descending order by rating
-  // sort: { "name": -1 },
-  // Include only the `title` and `imdb` fields in the returned document
-  // projection: { name: 1, password: 1, user_type: 1, _id: 1 },
-  // };
-  // const result = await userCollection.findOne(query, options);
 
   const result = await userCollection.findOne({ email: email });
   console.log("Fetched user:", result);
@@ -480,7 +464,7 @@ app.get('/events', (req, res) => {
   // Render the homepage template with the loggedIn status
   res.render('pages/events', { loggedIn, currentPath: req.path });
 
-});});});
+});
 
 app.get('/matching', async (req, res) => {
   if (!req.session.authenticated) {
