@@ -49,7 +49,10 @@ const node_session_secret = process.env.NODE_SESSION_SECRET;
 var { database } = include('databaseConnection');
 const userCollection = database.db(mongodb_database).collection('users');
 app.use(express.urlencoded({ extended: false }));
+const matchuserCollection = database.db(mongodb_database).collection('matchuser');
 
+app.use(express.urlencoded({ extended: false }));
+app.use(express.json());
 var mongoStore = MongoStore.create({
   mongoUrl: `mongodb+srv://${mongodb_user}:${mongodb_password}@${mongodb_host}/sessions`,
   crypto: {
@@ -228,9 +231,22 @@ app.get('/', (req, res) => {
 //Home Page
 app.get('/home', (req, res) => {
   // Check if user is logged in from the session
+app.get('/home', async(req, res) => {
+
   const loggedIn = req.session.authenticated;
   if (loggedIn) {
     res.render('pages/index', { name: req.session.name });
+
+      const userEmail = req.session.email;
+      console.log(userEmail);
+      const query = { email: userEmail };
+      const user = await matchuserCollection.findOne(query);
+      const save = user.matchuser_email;
+      const querysave = { email: { $in: save } };
+      const saveuser = await userCollection.find(querysave).toArray();
+      console.log(saveuser);
+      
+      res.render('pages/index', {loggedIn, username:req.session.name, users: saveuser, currentPath: req.path });
   } else {
     res.render('pages/landing');
   }
@@ -266,6 +282,21 @@ app.post('/signupSubmit', async (req, res) => {
   var hashedPassword = await bcrypt.hash(password, saltRounds);
   //Set the session as authenticated, Store the user's name in the session for future use and Set the expiration time of the session cookie
   await userCollection.insertOne({ name: name, email: email, password: hashedPassword, age: age, user_type: "user" });
+  // const pipeline = [
+  //   {
+  //       $project: {
+  //           _id: 0,
+  //           name: 1,
+  //           email: 1
+  //       }
+  //   },
+  //   {
+  //       $merge: "matchuser"
+  //   }
+  // ];
+  // const cursor = await userCollection.aggregate(pipeline);
+  await matchuserCollection.insertOne({ name: name, email: email});   
+
   req.session.authenticated = true;
   req.session.name = name;
   req.session.age = age;
@@ -449,4 +480,48 @@ app.get('/events', (req, res) => {
   // Render the homepage template with the loggedIn status
   res.render('pages/events', { loggedIn, currentPath: req.path });
 
+});});});
+
+app.get('/matching', async (req, res) => {
+  if (!req.session.authenticated) {
+    res.redirect('/login');
+    return;
+  }
+  //const { email} = req.session.email;
+  const hashedPassword = req.session.hashedPassword;
+  let lowAge = +req.session.age - 5
+  let highAge = +req.session.age + 5
+
+  try {
+
+    const matchuser = await userCollection.find({
+      age: { $gt: "" + lowAge, $lt: "" + highAge },
+      email: { $ne: req.session.email },
+    }).toArray();
+
+    console.log("=========================");
+    console.log(matchuser);
+    res.render("pages/matching", { users: matchuser, currentPath: req.path });
+
+  } catch (error) {
+    res.status(500).send('Error accessing user data');
+  }
+
 });
+
+app.post('/saveUser', async (req, res) => {
+ 
+    const email = req.body.matchEmail;
+    console.log(email);
+    const query = { email: req.session.email };
+    const update = {
+      $push: { 
+          matchuser_email: email
+      }
+  };
+     await matchuserCollection.updateOne(query,update);
+     res.redirect('/matching');
+});
+
+
+

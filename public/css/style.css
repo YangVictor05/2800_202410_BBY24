@@ -3,6 +3,7 @@ body {
     font-family: Arial, sans-serif;
     
 }
+
 .material-symbols-outlined {
   font-variation-settings:
   'FILL' 1,
@@ -127,9 +128,10 @@ footer {
     right: 10px;         /* Adjust as needed to control distance from the right edge */
     top: 10px;           /* Adjust as needed to control distance from the top */
     padding-top: 1px;    /* Reduced padding to make the button appear smaller */
-    padding-right: 1x;  /* You can adjust padding on all sides as needed */
+    padding-right: 1px;  /* You can adjust padding on all sides as needed */
     padding-bottom: 1px;
     padding-left: 1px;
     transform: scale(0.7);
     cursor: pointer;
 }
+
