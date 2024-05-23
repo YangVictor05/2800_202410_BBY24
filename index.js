@@ -228,21 +228,24 @@ app.get('/', (req, res) => {
 });
 
 //Home Page
-app.get('/home', async(req, res) => {
-
+app.get('/home', async (req, res) => {
   const loggedIn = req.session.authenticated;
   if (loggedIn) {
+    const userEmail = req.session.email;
+    console.log(userEmail);
+    const query = { email: userEmail };
+    const user = await matchuserCollection.findOne(query);
 
-      const userEmail = req.session.email;
-      console.log(userEmail);
-      const query = { email: userEmail };
-      const user = await matchuserCollection.findOne(query);
+    if (user && Array.isArray(user.matchuser_email)) {
       const save = user.matchuser_email;
       const querysave = { email: { $in: save } };
       const saveuser = await userCollection.find(querysave).toArray();
       console.log(saveuser);
-      
-      res.render('pages/index', {loggedIn, username:req.session.name, users: saveuser, currentPath: req.path });
+      res.render('pages/index', { loggedIn, username: req.session.name, users: saveuser, currentPath: req.path });
+    } else {
+      console.log("matchuser_email is not an array or user not found");
+      res.render('pages/index', { loggedIn, username: req.session.name, users: [], currentPath: req.path });
+    }
   } else {
     res.render('pages/landing');
   }
@@ -254,15 +257,13 @@ app.get('/signup', (req, res) => {
 });
 
 app.post('/signupSubmit', async (req, res) => {
-
   const { name, email, password, age } = req.body;
-  const schema = Joi.object(
-    {
-      name: Joi.string().alphanum().max(20).required(),
-      email: Joi.string().max(20).required(),
-      password: Joi.string().max(20).required(),
-      age: Joi.number().integer().min(1).max(120).required()
-    });
+  const schema = Joi.object({
+    name: Joi.string().alphanum().max(20).required(),
+    email: Joi.string().max(20).required(),
+    password: Joi.string().max(20).required(),
+    age: Joi.number().integer().min(1).max(120).required()
+  });
 
   const validationResult = schema.validate({ name, email, password, age });
 
@@ -273,22 +274,9 @@ app.post('/signupSubmit', async (req, res) => {
   }
 
   var hashedPassword = await bcrypt.hash(password, saltRounds);
-  //Set the session as authenticated, Store the user's name in the session for future use and Set the expiration time of the session cookie
+
   await userCollection.insertOne({ name: name, email: email, password: hashedPassword, age: age, user_type: "user" });
-  // const pipeline = [
-  //   {
-  //       $project: {
-  //           _id: 0,
-  //           name: 1,
-  //           email: 1
-  //       }
-  //   },
-  //   {
-  //       $merge: "matchuser"
-  //   }
-  // ];
-  // const cursor = await userCollection.aggregate(pipeline);
-  await matchuserCollection.insertOne({ name: name, email: email});   
+  await matchuserCollection.insertOne({ name: name, email: email, matchuser_email: [] });
 
   req.session.authenticated = true;
   req.session.name = name;
@@ -296,7 +284,6 @@ app.post('/signupSubmit', async (req, res) => {
   req.session.email = email;
   req.session.cookie.maxAge = expireTime;
   res.redirect('/profile');
-  //res.send("create user success")
 });
 
 //Login Page
