@@ -3,6 +3,7 @@ body {
     font-family: Arial, sans-serif;
     
 }
+
 .material-symbols-outlined {
   font-variation-settings:
   'FILL' 1,
@@ -133,3 +134,4 @@ footer {
     transform: scale(0.7);
     cursor: pointer;
 }
+
