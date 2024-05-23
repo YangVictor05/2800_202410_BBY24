@@ -1,9 +1,38 @@
 <%- include("../partials/header_after") %> 
-<h1>User Profile</h1>
-<p>Name: <%= name %></p>
-<p>Email: <%= email %></p>
-<p>Age: <%= age %></p>
-<p>Biography: <%= biography %></p>
 
-<!-- Link to the general user profile edit page -->
-<a href="/editUserProfile">Edit User Profile</a>
+<div class="profile-page-container">
+  <div class="profile-container">
+    <div class="profile-header">
+      <img src="<%= profilePicture %>" alt="Profile Picture" class="profile-picture" id="profile-picture">
+      <h1 class="profile-name"><%= name %></h1>
+      <p class="profile-email"><%= email %></p>
+    </div>
+    <div class="profile-details">
+      <p><strong>Age:</strong> <%= age %></p>
+      <p><strong>Biography:</strong> <%= biography %></p>
+    </div>
+    <div class="profile-actions">
+      <form action="/uploadProfilePicture" method="POST" enctype="multipart/form-data" class="upload-form">
+        <input type="file" name="image" accept="image/*" class="upload-input">
+        <button type="submit" class="upload-button">Upload Profile Picture</button>
+      </form>
+      <a href="/editUserProfile" class="edit-profile-link">Edit User Profile</a>
+    </div>
+    <div id="easter-egg" class="easter-egg">You're awesome!</div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    let clickCount = 0;
+    const profilePicture = document.getElementById('profile-picture');
+    const easterEgg = document.getElementById('easter-egg');
+
+    profilePicture.addEventListener('click', function() {
+      clickCount++;
+      if (clickCount === 5) {
+        easterEgg.style.display = 'block';
+      }
+    });
+  });
+</script>
