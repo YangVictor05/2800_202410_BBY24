@@ -233,8 +233,6 @@ app.get('/home', async(req, res) => {
 
   const loggedIn = req.session.authenticated;
   if (loggedIn) {
-    res.render('pages/index', { name: req.session.name });
-
       const userEmail = req.session.email;
       console.log(userEmail);
       const query = { email: userEmail };
@@ -242,8 +240,8 @@ app.get('/home', async(req, res) => {
       const save = user.matchuser_email;
       const querysave = { email: { $in: save } };
       const saveuser = await userCollection.find(querysave).toArray();
-      console.log(saveuser);
-      
+      console.log("==============================");
+      console.log(req.session.name);
       res.render('pages/index', {loggedIn, username:req.session.name, users: saveuser, currentPath: req.path });
   } else {
     res.render('pages/landing');
@@ -277,19 +275,7 @@ app.post('/signupSubmit', async (req, res) => {
   var hashedPassword = await bcrypt.hash(password, saltRounds);
   //Set the session as authenticated, Store the user's name in the session for future use and Set the expiration time of the session cookie
   await userCollection.insertOne({ name: name, email: email, password: hashedPassword, age: age, user_type: "user" });
-  // const pipeline = [
-  //   {
-  //       $project: {
-  //           _id: 0,
-  //           name: 1,
-  //           email: 1
-  //       }
-  //   },
-  //   {
-  //       $merge: "matchuser"
-  //   }
-  // ];
-  // const cursor = await userCollection.aggregate(pipeline);
+  
   await matchuserCollection.insertOne({ name: name, email: email});   
 
   req.session.authenticated = true;
@@ -326,14 +312,6 @@ app.post('/submitLogin', async (req, res) => {
     return;
   }
 
-  // const query = { email: email };
-  // const options = {
-  // Sort matched documents in descending order by rating
-  // sort: { "name": -1 },
-  // Include only the `title` and `imdb` fields in the returned document
-  // projection: { name: 1, password: 1, user_type: 1, _id: 1 },
-  // };
-  // const result = await userCollection.findOne(query, options);
 
   const result = await userCollection.findOne({ email: email });
   console.log("Fetched user:", result);
