@@ -1,9 +1,9 @@
 require("./utils.js");
 require('dotenv').config();
 const express = require('express');
-const multer = require('multer');
-const { CloudinaryStorage } = require('multer-storage-cloudinary');
-const cloudinary = require('cloudinary').v2;
+//const multer = require('multer');
+//const { CloudinaryStorage } = require('multer-storage-cloudinary');
+//const cloudinary = require('cloudinary').v2;
 const session = require('express-session');
 const MongoStore = require('connect-mongo');
 const bcrypt = require('bcrypt');
@@ -17,24 +17,24 @@ const router = express.Router();
 const Joi = require("joi");
 const expireTime = 1 * 60 * 60 * 1000; //expires after 1 hour  (minutes * seconds * millis)
 
-//Cloudinary config.
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
+// //Cloudinary config.
+// cloudinary.config({
+//   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+//   api_key: process.env.CLOUDINARY_API_KEY,
+//   api_secret: process.env.CLOUDINARY_API_SECRET,
+// });
 
-// Multer configuration
-const storage = new CloudinaryStorage({
-  cloudinary: cloudinary,
-  params: {
-    folder: 'profile_pictures',
-    format: async (req, file) => 'png', // supports promises as well
-    public_id: (req, file) => file.originalname,
-  },
-});
+// // Multer configuration
+// const storage = new CloudinaryStorage({
+//   cloudinary: cloudinary,
+//   params: {
+//     folder: 'profile_pictures',
+//     format: async (req, file) => 'png', // supports promises as well
+//     public_id: (req, file) => file.originalname,
+//   },
+// });
 
-const parser = multer({ storage: storage });
+// const parser = multer({ storage: storage });
 
 app.use(express.urlencoded({ extended: false }));
 
@@ -414,23 +414,23 @@ app.post('/updateProfile', async (req, res) => {
   }
 });
 
-app.post('/uploadProfilePicture', parser.single('image'), async (req, res) => {
-  try {
-    const imageUrl = req.file.path; // Cloudinary URL
-    const email = req.session.email; // Assuming email is stored in the session
+// app.post('/uploadProfilePicture', parser.single('image'), async (req, res) => {
+//   try {
+//     const imageUrl = req.file.path; // Cloudinary URL
+//     const email = req.session.email; // Assuming email is stored in the session
 
-    const result = await userCollection.updateOne(
-      { email: email },
-      { $set: { profilePicture: imageUrl } }
-    );
+//     const result = await userCollection.updateOne(
+//       { email: email },
+//       { $set: { profilePicture: imageUrl } }
+//     );
 
-    if (result.matchedCount === 0) return res.status(404).send('User not found');
+//     if (result.matchedCount === 0) return res.status(404).send('User not found');
 
-    res.redirect('/profile'); // Redirect to the profile page
-  } catch (err) {
-    res.status(500).send(err.message);
-  }
-});
+//     res.redirect('/profile'); // Redirect to the profile page
+//   } catch (err) {
+//     res.status(500).send(err.message);
+//   }
+// });
 
 //signout
 app.get('/signout', function (req, res) {
