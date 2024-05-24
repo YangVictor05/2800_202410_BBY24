@@ -229,6 +229,8 @@ app.get('/', (req, res) => {
 
 //Home Page
 app.get('/home', async (req, res) => {
+app.get('/home', async(req, res) => {
+
   const loggedIn = req.session.authenticated;
   if (loggedIn) {
     const userEmail = req.session.email;
@@ -237,6 +239,10 @@ app.get('/home', async (req, res) => {
     const user = await matchuserCollection.findOne(query);
 
     if (user && Array.isArray(user.matchuser_email)) {
+      const userEmail = req.session.email;
+      console.log(userEmail);
+      const query = { email: userEmail };
+      const user = await matchuserCollection.findOne(query);
       const save = user.matchuser_email;
       const querysave = { email: { $in: save } };
       const saveuser = await userCollection.find(querysave).toArray();
@@ -247,6 +253,10 @@ app.get('/home', async (req, res) => {
       res.render('pages/index', { loggedIn, username: req.session.name, users: [], currentPath: req.path });
     }
   } else {
+      console.log("==============================");
+      console.log(req.session.name);
+      res.render('pages/index', {loggedIn, username:req.session.name, users: saveuser, currentPath: req.path });
+     } else {
     res.render('pages/landing');
   }
 });
