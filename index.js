@@ -12,6 +12,7 @@ const jwt = require("jsonwebtoken");
 const nodemailer = require('nodemailer');
 const { google } = require('googleapis');
 const Joi = require("joi");
+const { connectToDatabase } = require('./databaseConnection');
 const JWT_SECRET = process.env.JWT_SECRET;
 const saltRounds = 12;
 const port = process.env.PORT || 3000;
@@ -65,7 +66,7 @@ async function startServer() {
     const matchuserCollection = database.collection('matchuser');
 
     var mongoStore = MongoStore.create({
-      mongoUrl: mongoUrl, // Use mongoUrl for MongoStore
+      client: database.client, // Use the client from the database connection
       crypto: {
         secret: mongodb_session_secret
       }
@@ -83,7 +84,7 @@ async function startServer() {
 
     app.use('/img', express.static(__dirname + '/public/img'));
     app.use('/css', express.static(__dirname + '/public/css'));
-
+    
     app.listen(port, () => {
       console.log("Node application listening on port " + port);
     });
