@@ -1,0 +1,69 @@
+* {
+  font-family: "Quicksand", sans-serif;
+  font-weight: 600;
+  font-size: medium;
+  font-style: normal;
+  border-width: 1px;
+}
+
+.content {
+  display: grid;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+h1 {
+  font-size: x-large;
+  font-weight: 1000;
+  color: #2A8386;
+}
+
+input, textarea, select {
+  display: grid;
+  margin-bottom: 20px;
+  width: 300px;
+  padding: 0%;
+  border-color: #3C9EA1;
+  border-style: solid;
+  border-radius: 5px;
+}
+
+textarea {
+  height: 150px;
+}
+
+.create {
+  padding: 12px 0px;
+  width: 305px;
+  border-style: none;
+  background-color: #3C9EA1;
+  color: white;
+  margin-top: 40px;
+}
+
+.cancel {
+  padding: 7px 0px;
+  width: 305px;
+  border-style: solid;
+  background-color: white;
+  color: #2A8386;
+}
+
+select option:hover {
+  box-shadow: 0 0 10px 100px #3C9EA1 inset !important;
+  color:white;
+}
+
+select option:checked{
+  box-shadow: 0 0 10px 100px #3C9EA1 inset !important;
+}
+
+input::file-selector-button {
+  font-weight: bold;
+  background-color: #3C9EA1;
+  color: white;
+  border: thin solid #3C9EA1;
+  border-radius: 3px;
+  font-weight: 400;
+}

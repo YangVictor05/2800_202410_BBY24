@@ -1,0 +1,8 @@
+<%- include("../partials/header_after") %> 
+<div class="content">
+  Your event has been created successfully!
+  <form action="/event-my" method="GET">
+    <button type="button" class="backbutton">Back to my events</button>
+  </form>
+</div>
+<%- include("../partials/footer", {currentPath: currentPath }) %> 
