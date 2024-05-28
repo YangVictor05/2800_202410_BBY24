@@ -1,6 +1,7 @@
 body{
     margin-top:20px;
-    background:#eee;    
+    background:#eee; 
+    align-items: center;   
 }
 a {
     color: #f96332;
@@ -67,3 +68,9 @@ a {
     padding: 15px 0;
     color: #424242
 }
+.div_match {
+    display: grid;
+    grid-template-columns: auto auto;
+    padding: 5px;
+    position: relative;
+  }
