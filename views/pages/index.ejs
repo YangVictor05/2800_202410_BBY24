@@ -1,10 +1,17 @@
 <%- include("../partials/header_after") %> 
-<h1>Hello <%= username %></h1>
-<h2>Recently save match users</h2>
-<div>
-    <% let i=0; %>
-         <% for(i=0; i < users.length; i++) { %>
-          <%- include('../templates/matchingcard', {matchuser: users[i]})  %> 
-      <% } %> 
+<!-- <h1>Hello</h1> -->
+<div id="event-container">
+    <img src="" alt="event image" class="image">
+    <div class="overlay">
+        <span class="title">Event Title</span>
+        <a href="#" class="read-more">Read More</a>
+    </div>
+</div>
+<h2>Saved users</h2>
+<div id="people">
+    <% let j=0; %>
+        <% for(j=0; j < 3; j++) { %>
+        <%- include('../templates/recentcard', {matchuser: users[j]})  %> 
+    <% } %> 
 </div>
 <%- include("../partials/footer", {currentPath: currentPath }) %> 
