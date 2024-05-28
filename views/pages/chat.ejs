@@ -1,0 +1,122 @@
+<%- include("../partials/header_after") %> 
+
+<div class="container-fluid">
+  <div class="row">
+    <!-- Chat List -->
+    <div class="col-12 col-md-4 chat-list d-none d-md-block">
+      <% users.forEach(user => { %>
+        <div class="chat-item" onclick="showChat(this, '<%= user.name %>', '<%= user.email %>')">
+          <img src="<%= user.profilePicture || 'https://via.placeholder.com/50' %>" class="chat-avatar" alt="Avatar">
+          <div class="chat-info">
+            <div class="chat-name"><%= user.name %></div>
+            <div class="chat-last-message">Last message from <%= user.name %></div>
+          </div>
+        </div>
+      <% }) %>
+    </div>
+
+    <!-- Chat Messages -->
+    <div class="col-12 col-md-8 chat-messages d-block">
+      <!-- Chat Header -->
+      <div class="d-flex align-items-center p-3 border-bottom chat-header d-none">
+        <img src="https://via.placeholder.com/50" class="chat-avatar" alt="Avatar">
+        <h5 class="ml-3 mb-0 chat-contact-name">Contact Name</h5>
+      </div>
+
+      <!-- Chat Body -->
+      <div class="d-flex flex-column p-3 chat-body" style="background-color: #f8f9fa; flex-grow: 1;">
+        <!-- Initial Message -->
+        <div class="initial-message" style="text-align: center; margin: auto;">
+          <img src="/img/Linkup_logo.png" alt="Logo" style="width: 100px; height: 100px;">
+          <p>Link up to start conversation</p>
+        </div>
+
+        <!-- Messages -->
+        <div class="messages d-none">
+          <div class="message received">Hello!</div>
+          <div class="message sent">Hi there!</div>
+          <!-- Add more messages as needed -->
+        </div>
+      </div>
+
+      <!-- Chat Input -->
+      <div class="chat-footer d-none">
+        <div class="input-group">
+          <form id="message-form">
+            <input type="text" class="form-control" placeholder="Type a message" id="input">
+            <div class="input-group-append">
+              <button class="btn btn-primary" type="submit">Send</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Bootstrap JS and dependencies -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+
+<script>
+  let currentRoom = null;
+  const socket = io();
+
+  function showChat(element, contactName, contactEmail) {
+    document.querySelector('.initial-message').classList.add('d-none');
+    document.querySelector('.messages').classList.remove('d-none');
+    document.querySelector('.chat-header').classList.remove('d-none');
+    document.querySelector('.chat-footer').classList.remove('d-none');
+    document.querySelector('.chat-contact-name').innerText = contactName;
+    
+
+    // Leave the previous room if there is one
+    if (currentRoom) {
+      socket.emit('leaveRoom', currentRoom);
+    }
+
+    // Join the new room
+    currentRoom = contactEmail; // Assuming email is used as room identifier
+    socket.emit('startChat', currentRoom);
+  }
+
+  const $messagesContainer = document.querySelector('.messages')
+
+  document.querySelector('#message-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const input = document.querySelector('#input');
+    if (input.value && currentRoom) {
+      socket.emit('message', { room: currentRoom, message: input.value });
+      input.value = '';
+      const messageText = input.value;
+      addMessage(messageText, 'sent')
+    }
+  });
+
+  function addMessage(text, type) {
+    const messageElement = document.createElement('div')
+    messageElement.classList.add('message', type)
+    messageElement.innerText = text
+    $messagesContainer.appendChild(messageElement)
+  }
+
+  socket.on('connect', () => {
+    console.log('Connected to server');
+  });
+
+  socket.on('disconnect', () => {
+    console.log('Disconnected from server');
+  });
+
+  socket.on('chatStarted', (message) => {
+    console.log(message);
+  });
+
+  socket.on('message', (msg) => {
+    console.log(msg);
+  });
+</script>
+
+<%- include("../partials/footer", {currentPath: currentPath }) %> 
