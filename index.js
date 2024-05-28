@@ -242,6 +242,7 @@ app.get('/', (req, res) => {
 
 //Home Page
 app.get('/home', async (req, res) => {
+
   const loggedIn = req.session.authenticated;
   if (loggedIn) {
     const userEmail = req.session.email;
@@ -251,9 +252,14 @@ app.get('/home', async (req, res) => {
     const save = user.matchuser_email;
     const querysave = { email: { $in: save } };
     const saveuser = await userCollection.find(querysave).toArray();
+    const usersWithDefaultPics = saveuser.map(user => ({
+      ...user,
+      profilePicture: user.profilePicture || '/img/default-profile.png'
+    }));
+
     console.log("==============================");
     console.log(req.session.name);
-    res.render('pages/index', { loggedIn, username: req.session.name, users: saveuser, currentPath: req.path });
+    res.render('pages/index', { loggedIn, username: req.session.name, users: usersWithDefaultPics, currentPath: req.path });
   } else {
     res.render('pages/landing');
   }
@@ -467,7 +473,7 @@ app.get('/matching', async (req, res) => {
     res.redirect('/login');
     return;
   }
-  //const { email} = req.session.email;
+
   const hashedPassword = req.session.hashedPassword;
   let lowAge = +req.session.age - 5
   let highAge = +req.session.age + 5
@@ -509,6 +515,15 @@ app.post('/saveUser', async (req, res) => {
   await matchuserCollection.updateOne(query, update);
   res.redirect('/matching');
 });
+
+app.post('/chattingnow', async (req, res) => {
+  if (!req.session.authenticated) {
+    res.redirect('/login');
+    return;
+  }
+  res.redirect('/chat');
+});
+
 
 
 
