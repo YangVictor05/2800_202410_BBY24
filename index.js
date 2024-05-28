@@ -241,21 +241,20 @@ app.get('/', (req, res) => {
 });
 
 //Home Page
-app.get('/home', async(req, res) => {
-
+app.get('/home', async (req, res) => {
   const loggedIn = req.session.authenticated;
   if (loggedIn) {
-      const userEmail = req.session.email;
-      console.log(userEmail);
-      const query = { email: userEmail };
-      const user = await matchuserCollection.findOne(query);
-      const save = user.matchuser_email;
-      const querysave = { email: { $in: save } };
-      const saveuser = await userCollection.find(querysave).toArray();
-      console.log("==============================");
-      console.log(req.session.name);
-      res.render('pages/index', {loggedIn, username:req.session.name, users: saveuser, currentPath: req.path });
-     } else {
+    const userEmail = req.session.email;
+    console.log(userEmail);
+    const query = { email: userEmail };
+    const user = await matchuserCollection.findOne(query);
+    const save = user.matchuser_email;
+    const querysave = { email: { $in: save } };
+    const saveuser = await userCollection.find(querysave).toArray();
+    console.log("==============================");
+    console.log(req.session.name);
+    res.render('pages/index', { loggedIn, username: req.session.name, users: saveuser, currentPath: req.path });
+  } else {
     res.render('pages/landing');
   }
 });
@@ -479,10 +478,17 @@ app.get('/matching', async (req, res) => {
       age: { $gt: "" + lowAge, $lt: "" + highAge },
       email: { $ne: req.session.email },
     }).toArray();
+    const usersWithDefaultPics = matchuser.map(user => ({
+      ...user,
+      profilePicture: user.profilePicture || '/img/default-profile.png'
+    }));
 
     console.log("=========================");
     console.log(matchuser);
-    res.render("pages/matching", { users: matchuser, currentPath: req.path });
+    res.render("pages/matching", {
+      users: usersWithDefaultPics,
+      currentPath: req.path
+    });
 
   } catch (error) {
     res.status(500).send('Error accessing user data');
@@ -491,17 +497,17 @@ app.get('/matching', async (req, res) => {
 });
 
 app.post('/saveUser', async (req, res) => {
- 
-    const email = req.body.matchEmail;
-    console.log(email);
-    const query = { email: req.session.email };
-    const update = {
-      $push: { 
-          matchuser_email: email
-      }
+
+  const email = req.body.matchEmail;
+  console.log(email);
+  const query = { email: req.session.email };
+  const update = {
+    $push: {
+      matchuser_email: email
+    }
   };
-     await matchuserCollection.updateOne(query,update);
-     res.redirect('/matching');
+  await matchuserCollection.updateOne(query, update);
+  res.redirect('/matching');
 });
 
 
