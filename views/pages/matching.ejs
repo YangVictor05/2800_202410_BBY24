@@ -1,7 +1,9 @@
 <%- include("../partials/header_after") %> 
+<br>
 <% let i=0; %>
          <% for(i=0; i < users.length; i++) { %>
           <%- include('../templates/matchingcard', {matchuser: users[i]})  %> 
       <% } %> 
-        
+<br> 
+<br>       
 <%- include("../partials/footer", {currentPath: currentPath }) %> 
