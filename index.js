@@ -54,12 +54,8 @@ const node_session_secret = process.env.NODE_SESSION_SECRET;
 var { database } = include('databaseConnection');
 const userCollection = database.db(mongodb_database).collection('users');
 const matchuserCollection = database.db(mongodb_database).collection('matchuser');
-<<<<<<< HEAD
-const eventCollection = database.db(mongodb_database).collection('event-Info');
-=======
 const messagesCollection = database.db(mongodb_database).collection("messages");
 const eventInfoCollection = database.db(mongodb_database).collection("event_Info");
->>>>>>> 7de4789a4a380cbcc4b5440afd0f37e7529d5561
 
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
@@ -256,23 +252,16 @@ app.get('/home', async (req, res) => {
     const user = await matchuserCollection.findOne(query);
     const save = user.matchuser_email;
     const querysave = { email: { $in: save } };
-<<<<<<< HEAD
     const saveuser = await userCollection.find(querysave).toArray();
     const usersWithDefaultPics = saveuser.map(user => ({
       ...user,
       profilePicture: user.profilePicture || '/img/default-profile.png'
     }));
-
+    const events = await eventInfoCollection.find().toArray();
+    console.log(saveuser);
     console.log("==============================");
     console.log(req.session.name);
-    res.render('pages/index', { loggedIn, username: req.session.name, users: usersWithDefaultPics, currentPath: req.path });
-=======
-    const saveuser = await userCollection.find().toArray();
-    const events = await eventCollection.find().toArray();
-    console.log("==============================");
-    console.log(req.session.name);
-    res.render('pages/index', { loggedIn, username: req.session.name, users: saveuser, event: events, currentPath: req.path });
->>>>>>> homepage
+    res.render('pages/index', { loggedIn, username: req.session.name, event: events, users: usersWithDefaultPics, currentPath: req.path });
   } else {
     res.render('pages/landing');
   }

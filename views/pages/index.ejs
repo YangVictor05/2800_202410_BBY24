@@ -5,19 +5,15 @@
         <% for(i=0; i < event.length; i++) { %>
         <%- include('../templates/eventcard', {events: event[i]})  %> 
     <% } %> 
-    <div class="event-template">
-        <img src="/img/solid-color-image.jpeg" alt="Event Image" class="event-image">
-        <div class="event-overlay">
-            <span class="event-title">Event Title (Event Date)</span>
-            <a href="/events/1" class="read-more">Read More</a>
-        </div>
-    </div>
 </div>
 <h2>Saved users</h2>
 <div id="people">
-    <% let j=0; %>
+    <% if (users.length > 0) { %>
+        <% let j=0; %>
         <% for(j=0; j < Math.floor(3, users.length); j++) { %>
         <%- include('../templates/recentcard', {matchuser: users[j]})  %> 
-    <% } %> 
+         <% } %> 
+      <% } else { %>
+      <% } %>
 </div>
 <%- include("../partials/footer", {currentPath: currentPath }) %> 
