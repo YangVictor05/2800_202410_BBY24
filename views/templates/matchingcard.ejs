@@ -4,13 +4,11 @@
             <div class="card profile-header">
                 <div class="div_match body">
                     <div class="row">
-
-                        <div class="col-lg-4 col-md-4 col-12">
-     
-      <div class="profile-image float-md-right"> <img src="<%= matchuser.profilePicture %>"
-                                    alt="Profile Picture" class="profile-picture" id="profile-picture"> </div>
-                        </div>
-
+                        <div class="col-lg-4 col-md-4 col-12">    
+                            <div class="profile-image float-md-right"> 
+                                <img src="<%= matchuser.profilePicture %>" alt="Profile Picture" class="profile-picture" id="profile-picture"> 
+                            </div> <!-- profile -->
+                        </div> <!-- col-lg-4-->
                         <div class="col-lg-8 col-md-8 col-12">
                             <h4 class="m-t-0 m-b-0"><strong>
                                     <%= matchuser.name %>
@@ -27,7 +25,7 @@
                                         <input type="hidden" name="matchEmail" value="<%= matchuser.email %>">
                                         <button type="submit" class="w-80 py-2 mybutton">Save for later</button>
                                     </form>
-                                </div>
+                                </div> <!-- form-->
                                 <div>
                                     <form action="/chattingnow" method="post">
                                         <input type="hidden" name="matchEmail" value="<%= matchuser.email %>">
@@ -40,5 +38,14 @@
                 </div>
             </div>
         </div>
+                                </div> <!-- button-->
+                            </div> <!-- div match-->
+                        </div> <!-- col-lg-8-->
+                    </div><!-- row -->
+                </div> <!-- div_match body-->
+            </div> <!-- card-profile-header -->
+        </div> <!-- col-xl-6-->
+    </div><!-- row-->
+</div> <!-- container profile page -->
     </div>
 </div>

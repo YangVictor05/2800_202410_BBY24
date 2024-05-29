@@ -257,10 +257,11 @@ app.get('/home', async (req, res) => {
       ...user,
       profilePicture: user.profilePicture || '/img/default-profile.png'
     }));
-
+    const events = await eventInfoCollection.find().toArray();
+    console.log(saveuser);
     console.log("==============================");
     console.log(req.session.name);
-    res.render('pages/index', { loggedIn, username: req.session.name, users: usersWithDefaultPics, currentPath: req.path });
+    res.render('pages/index', { loggedIn, username: req.session.name, event: events, users: usersWithDefaultPics, currentPath: req.path });
   } else {
     res.render('pages/landing');
   }
