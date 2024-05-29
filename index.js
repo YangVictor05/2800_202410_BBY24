@@ -54,6 +54,7 @@ const node_session_secret = process.env.NODE_SESSION_SECRET;
 var { database } = include('databaseConnection');
 const userCollection = database.db(mongodb_database).collection('users');
 const matchuserCollection = database.db(mongodb_database).collection('matchuser');
+const eventCollection = database.db(mongodb_database).collection('event-Info');
 
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
@@ -250,10 +251,11 @@ app.get('/home', async (req, res) => {
     const user = await matchuserCollection.findOne(query);
     const save = user.matchuser_email;
     const querysave = { email: { $in: save } };
-    const saveuser = await userCollection.find(querysave).toArray();
+    const saveuser = await userCollection.find().toArray();
+    const events = await eventCollection.find().toArray();
     console.log("==============================");
     console.log(req.session.name);
-    res.render('pages/index', { loggedIn, username: req.session.name, users: saveuser, currentPath: req.path });
+    res.render('pages/index', { loggedIn, username: req.session.name, users: saveuser, event: events, currentPath: req.path });
   } else {
     res.render('pages/landing');
   }

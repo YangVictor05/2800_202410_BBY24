@@ -1,59 +1,93 @@
 body {
     margin: 0;
     padding: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    font-family: Arial, sans-serif;
+    background-color: #f0f0f0;
 }
 
-.container {
+header, footer {
+    background-color: #2d8c8c;
+    color: white;
+    padding: 10px;
+    text-align: center;
+}
+
+#event-container, #people {
+    width: 90%;
+    margin: 15px auto;
+}
+
+.event-template {
     position: relative;
-    display: inline-block;
-    width: 300px; /* Adjust width as needed */
-    height: 200px; /* Adjust height as needed */
+    margin-bottom: 20px;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.image {
+.event-image {
     width: 100%;
-    height: 100%;
-    object-fit: cover;
+    height: auto;
+    display: block;
 }
 
-.overlay {
+.event-overlay {
     position: absolute;
     bottom: 0;
-    left: 0;
     width: 100%;
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.6);
+    color: white;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px;
-    background: rgba(0, 0, 0, 0.6);
 }
 
-.name {
-    color: white;
-    font-size: 16px;
-    font-weight: bold;
+.event-title {
+    font-size: 14px;
 }
 
 .read-more {
     color: white;
     text-decoration: none;
-    font-size: 16px;
+    font-size: 12px;
+}
+#people {
+    bottom: 0;
+    height: 50%;
+}
+#matched-template {
+    display: flex;
+    align-items: center;
+    padding: 5px;
+    margin: 10px 0;
+    width: 90%;
+    background-color: #eaeaea;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    text-overflow: hidden;
 }
 
 .profile-image {
-    grid-area: image;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 40px;
+    height: 40px;
+    background-color: #d4bf58;
+    border-radius: 50%;
+    font-size: 12px;
+    color: white;
+}
+
+.profile-image img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
 }
 
 .user-details {
-    grid-area: details;
-}
-
-#matched-template {
-    display: grid;
-    grid-template-columns: 35% 65%;
-    grid-template-areas:
-    "image details";
+    display: flex;
+    flex-direction: column;
 }
