@@ -59,15 +59,21 @@ header, footer {
 #matched-template {
     display: flex;
     align-items: center;
-    padding: 5px;
     margin: 10px 0;
-    width: 90%;
+    width: 100%;
     background-color: #eaeaea;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    text-overflow: hidden;
 }
-
+.user-details #name {
+    margin-top: 0.5em;
+    margin-left: 0.5em;
+    font-size: 1.2em;
+}
+.user-details > p {
+    margin-left: 0.5em;
+    font-size: 0.8em;
+}
 .profile-image {
     display: flex;
     justify-content: center;
