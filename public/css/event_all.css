@@ -1,0 +1,166 @@
+* {
+  font-family: "Quicksand", sans-serif;
+  font-weight: 600;
+  font-size: 25px;
+  font-style: normal;
+}
+
+.container {
+  display: grid;
+  justify-content: center;
+  margin-left: 10%;
+  margin-right: 10%;
+  margin-top: 60px;
+}
+
+*,*:focus,*:hover{
+  outline:none;
+}
+
+select {
+  color: #3C9EA1;
+}
+
+
+select option:hover {
+  box-shadow: 0 0 10px 100px #3C9EA1 inset !important;
+  color:white;
+}
+
+select option:checked{
+  box-shadow: 0 0 10px 100px #3C9EA1 inset !important;
+}
+
+input::file-selector-button {
+  background-color: #3C9EA1;
+  color: white;
+  border: transparent;
+  font-weight: 400;
+}
+
+#addeventbtn {
+  display: flex;
+  align-items: center;
+  justify-items: center;
+  color: #3C9EA1;
+  scale: 3;
+  position: absolute;
+  bottom: 20vh;
+  right: 10vw;
+  
+  font-variation-settings:
+  'FILL' 1,
+  'opsz' 50
+}
+
+#plus {
+  color: white;
+  scale: 0.6;
+  position: absolute;
+
+  font-variation-settings:
+  'FILL' 1,
+  'wght' 700,
+  'opsz' 24
+}
+
+#filtericon {
+  color: #3C9EA1;
+  scale: 1.5;
+  position: relative;
+}
+
+#event_page {
+  border-color: transparent;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  padding-left: 10px;
+  height: fit-content;
+  /* margin-bottom: 10px; */
+}
+
+.eventcardbody {
+  padding-left: 5%;
+  display: flex;
+  align-items: center;
+  border: 2px solid #3C9EA1;
+  border-radius: 15px;
+  height: 25vh;
+  width: 75vw;
+  margin-bottom: 10px;
+  margin-top: 15px;
+}
+
+.event_picture {
+  border-radius: 10px;
+  height: 21vh;
+  width: 37vw;
+  object-fit: contain;
+}
+
+#locationpin, #calendar, #clock {
+  display: flex;
+  color: #3C9EA1;
+
+  font-variation-settings:
+  'FILL' 1,
+  'wght' 400,
+  'opsz' 37
+}
+
+.location, .date, .time {
+  display: flex;
+  align-items: center;
+
+}
+
+h3 {
+  font-size: 20px;
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+h4 {
+  font-size: 16px;
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+h5 {
+  font-size: 14px;
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.event_details {
+  margin-left: 12px;
+  margin-right: 10px;
+}
+
+.event_access {
+  background-color: #bde9ea;
+  border-radius: 5px;
+  width: fit-content;
+  padding: 3px 15px;
+}
+
+.event_description {
+  height: 40px;
+  overflow: hidden;
+}
+
+.bottomwhitespace {
+  height: 120px;
+}
+@media screen and (min-width: 320px) {
+
+}
+
+@media screen and (min-width: 431px) {
+  
+}
