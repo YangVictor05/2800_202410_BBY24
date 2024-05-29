@@ -54,6 +54,7 @@ const node_session_secret = process.env.NODE_SESSION_SECRET;
 var { database } = include('databaseConnection');
 const userCollection = database.db(mongodb_database).collection('users');
 const matchuserCollection = database.db(mongodb_database).collection('matchuser');
+const messagesCollection = database.db(mongodb_database).collection("messages");
 
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
@@ -90,6 +91,7 @@ server.listen(port, () => {
 });
 
 
+//Password reset
 
 //Set up mailing service
 const nodemailer = require('nodemailer')
@@ -143,8 +145,6 @@ function get_html_message(name, text) {
   `
 }
 
-
-
 app.get('/reset', (req, res) => {
   var message = req.query.msg ? req.query.msg : '';
   res.render('pages/forgot-password', { msg: message });
@@ -159,7 +159,7 @@ app.post('/forgot-password', async (req, res) => {
     const oldUser = await userCollection.findOne({ email });
     if (!oldUser) {
       console.log("Use Not found");
-      return res.redirect("/reset?msg=If you have account with us, an email to reset your password has been set to your inbox. Please check your email to proceed.");
+      return res.redirect("/reset?msg=If you have an account with us, an email to reset your password has been sent to your inbox. Please check your email to proceed.");
     }
     const secret = JWT_SECRET + oldUser.password;
     const token = jwt.sign({ email: oldUser.email, id: oldUser._id }, secret, {
@@ -171,7 +171,7 @@ app.post('/forgot-password', async (req, res) => {
     console.log(oldUser);
 
     send_mail(oldUser.name, email, link);
-    return res.redirect("/reset?msg=If you have account with us, an email to reset your password has been set to your inbox. Please check your email to proceed.");
+    return res.redirect("/reset?msg=If you have an account with us, an email to reset your password has been sent to your inbox. Please check your email to proceed.");
 
 
   } catch (error) { }
@@ -527,111 +527,127 @@ app.post('/chattingnow', async (req, res) => {
 
 
 
-//chat page. 
-app.get('/chat', async (req, res) => {
+// Socekt.io listener
+io.on("connection", (socket) => {
+  console.log("A user connected");
+
+  socket.on("join", ({ room, matchedUserEmail }) => {
+    socket.join(room);
+
+    console.log(`${matchedUserEmail} has joined ${room}!`);
+
+    const message = generateMessage(`${matchedUserEmail} has joined!`);
+    message.messageType = "received";
+    // socket.broadcast.to(room).emit("message", message);
+  });
+
+  socket.on("sendMessage", async (data) => {
+    console.log(
+      `Sender: ${data.sender} sent to room ${data.room}: ${data.message}`
+    );
+    const message = generateMessage(data.message);
+    message.sender = data.sender;
+    io.to(data.room).emit("message", message);
+
+    try {
+      // Store the message in MongoDB
+      message.room = data.room;
+
+      const result = await messagesCollection.insertOne(message);
+      console.log("Message stored in MongoDB with ID:", result.insertedId);
+    } catch (error) {
+      console.error("Error storing message in MongoDB:", error);
+    }
+  });
+
+  socket.on("disconnect", () => {
+    console.log("A user disconnected");
+  });
+
+  socket.on("leave", (room) => {
+    socket.leave(room);
+  });
+});
+
+// Route handler
+app.get("/chat", async (req, res) => {
   if (!req.session.authenticated) {
-      res.redirect('/login');
-      return;
+    res.redirect("/login");
+    return;
   }
   const userEmail = req.session.email;
   const query = { email: userEmail };
   const matched_user = await matchuserCollection.findOne(query);
-  
+
   const matched_users = matched_user.matchuser_email;
 
-  const users = []
+  const users = [];
   for (const user_email of matched_users) {
     const current_user = await userCollection.findOne({ email: user_email });
-    // Check if the user already exists in the users array
-    if (!users.some(user => user.email === current_user.email)) {
+    if (!users.some((user) => user.email === current_user.email)) {
       users.push(current_user);
     }
   }
-  if(matched_users == null || matched_users.length === 0){
+
+  if (matched_users == null || matched_users.length === 0) {
     console.log("No matched user");
-    res.render('pages/chat-empty', {
-      currentPath: req.path 
-  });
+    res.render("pages/chat-empty", {
+      currentPath: req.path,
+    });
     return;
-  } 
-  
+  }
 
-  console.log("Fetching profile for email:", req.session.email);  // Debugging output
+  console.log("Fetching profile for email:", req.session.email);
 
-  
-
-try {
-        const userProfile = await userCollection.findOne({ email: req.session.email });
-        if (!userProfile) {
-            console.log('User profile not found for email:', req.session.email);
-            res.status(404).send("Profile not found");  // More appropriate HTTP status code for not found
-            return;
-        }
-
-        // Handle socket connections
-        io.on('connection', (socket) => {
-          console.log('A user connected');
-          
-          // Handle disconnection
-          socket.on('disconnect', () => {
-            console.log('A user disconnected');
-          });
-
-
-          room = 'lilasikuta@gmail.com'
-          socket.on('startChat', () => {
-            // Join the specified room
-            socket.join(room);
-            console.log(`User ${socket.id} joined room ${room}`);
-        
-            // Optionally, acknowledge that the chat has started
-            io.to(room).emit('chatStarted', `Chat has started in room ${room}`);
-          });
-        
-          socket.on('message', ({ message }) => {
-            // Send the message to the specified room
-            io.to(room).emit('message', message);
-          });
-        
-          socket.on('leaveRoom', () => {
-            // Leave the specified room
-            socket.leave(room);
-            console.log(`User ${socket.id} left room ${room}`);
-          });
-
-          
-
-          // Handle the custom event to start a chat
-        //   socket.on('startChat', (username) => {
-        //     // Join a room with the username as the room name
-        //     socket.join(username);
-        //     console.log(`User ${socket.id} joined room ${username}`);
-
-        //     // Optionally, you can emit an event to acknowledge that the chat has started
-        //     io.to(username).emit('chatStarted', 'Chat has started with ' + username);
-        //   });
-        });
-
-
-        res.render('pages/chat', {
-            name: userProfile.name,
-            email: userProfile.email,
-            age: userProfile.age,
-            biography: userProfile.biography || '',  // Provide an empty string if biography is undefined
-            profilePicUrl: userProfile.profilePicUrl || '/img/default-profile.png', // Default profile picture
-            currentPath: req.path ,
-            users: users
-        });
-
-
-    } catch (error) {
-        console.error('Error fetching user profile:', error);
-        res.status(500).send("Failed to fetch profile.");  // Internal Server Error for unexpected issues
+  try {
+    const userProfile = await userCollection.findOne({
+      email: req.session.email,
+    });
+    if (!userProfile) {
+      console.log("User profile not found for email:", req.session.email);
+      res.status(404).send("Profile not found");
+      return;
     }
+
+    res.render("pages/chat", {
+      id: userProfile._id,
+      name: userProfile.name,
+      email: userProfile.email,
+      age: userProfile.age,
+      biography: userProfile.biography || "",
+      profilePicUrl: userProfile.profilePicUrl || "/img/default-profile.png",
+      currentPath: req.path,
+      currentUser: matched_user,
+      users: users,
+    });
+  } catch (error) {
+    console.error("Error fetching user profile:", error);
+    res.status(500).send("Failed to fetch profile.");
+  }
 });
 
-
 //Chat-empty
-app.get('/chat-empty', (req, res) => {
-  res.render('pages/chat-empty');
-})
+app.get("/chat-empty", (req, res) => {
+  res.render("pages/chat-empty");
+});
+
+// Retrieve messages from DB and pass them to front
+app.get("/messages/:roomId", async (req, res) => {
+  const { roomId } = req.params;
+
+  try {
+    const messages = await messagesCollection.find({ room: roomId }).toArray();
+
+    // Send the retrieved messages as a JSON response
+    res.json(messages);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch messages" });
+  }
+});
+
+const generateMessage = (text) => {
+  return {
+    text,
+    createdAt: new Date().getTime(),
+  };
+};
