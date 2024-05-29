@@ -381,7 +381,8 @@ app.get('/profile', async (req, res) => {
       email: userProfile.email,
       age: userProfile.age,
       biography: userProfile.biography || '',  // Provide an empty string if biography is undefined
-      profilePicture: userProfile.profilePicture || '/img/default-profile.png' // Default profile picture
+      profilePicture: userProfile.profilePicture || '/img/default-profile.png', // Default profile picture
+      currentPath: req.path
     });
   } catch (error) {
     console.error('Error fetching user profile:', error);
