@@ -97,6 +97,7 @@ header, footer {
 }
 
 .user-details {
+    font-size: 0.8em;
     width: 95%;
     position: relative;
     display: flex;
