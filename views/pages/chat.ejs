@@ -1,33 +1,55 @@
-<%- include("../partials/header_after") %> 
+<%- include("../partials/header_after") %>
 
 <div class="container-fluid">
   <div class="row">
     <!-- Chat List -->
     <div class="col-12 col-md-4 chat-list d-none d-md-block">
       <% users.forEach(user => { %>
-        <div class="chat-item" onclick="showChat(this, '<%= user.name %>', '<%= user.email %>')">
-          <img src="<%= user.profilePicture || 'https://via.placeholder.com/50' %>" class="chat-avatar" alt="Avatar">
-          <div class="chat-info">
-            <div class="chat-name"><%= user.name %></div>
-            <div class="chat-last-message">Last message from <%= user.name %></div>
+      <div
+        class="chat-item"
+        onclick="showChat(this, '<%= JSON.stringify(user) %>')"
+      >
+        <img
+          src="<%= user.profilePicture || 'https://via.placeholder.com/50' %>"
+          class="chat-avatar"
+          alt="Avatar"
+        />
+        <div class="chat-info">
+          <div class="chat-name"><%= user.name %></div>
+          <div class="chat-last-message">
+            Last message from <%= user.name %>
           </div>
         </div>
+      </div>
       <% }) %>
     </div>
 
     <!-- Chat Messages -->
     <div class="col-12 col-md-8 chat-messages d-block">
       <!-- Chat Header -->
-      <div class="d-flex align-items-center p-3 border-bottom chat-header d-none">
-        <img src="https://via.placeholder.com/50" class="chat-avatar" alt="Avatar">
+      <div
+        class="d-flex align-items-center p-3 border-bottom chat-header d-none"
+      >
+        <img
+          src="https://via.placeholder.com/50"
+          class="chat-avatar message-avatar"
+          alt="Avatar"
+        />
         <h5 class="ml-3 mb-0 chat-contact-name">Contact Name</h5>
       </div>
 
       <!-- Chat Body -->
-      <div class="d-flex flex-column p-3 chat-body" style="background-color: #f8f9fa; flex-grow: 1;">
+      <div
+        class="d-flex flex-column p-3 chat-body"
+        style="background-color: #f8f9fa; flex-grow: 1"
+      >
         <!-- Initial Message -->
-        <div class="initial-message" style="text-align: center; margin: auto;">
-          <img src="/img/Linkup_logo.png" alt="Logo" style="width: 100px; height: 100px;">
+        <div class="initial-message" style="text-align: center; margin: auto">
+          <img
+            src="/img/Linkup_logo.png"
+            alt="Logo"
+            style="width: 100px; height: 100px"
+          />
           <p>Link up to start conversation</p>
         </div>
 
@@ -43,7 +65,12 @@
       <div class="chat-footer d-none">
         <div class="input-group">
           <form id="message-form">
-            <input type="text" class="form-control" placeholder="Type a message" id="input">
+            <input
+              type="text"
+              class="form-control"
+              placeholder="Type a message"
+              id="input"
+            />
             <div class="input-group-append">
               <button class="btn btn-primary" type="submit">Send</button>
             </div>
@@ -64,59 +91,98 @@
   let currentRoom = null;
   const socket = io();
 
-  function showChat(element, contactName, contactEmail) {
-    document.querySelector('.initial-message').classList.add('d-none');
-    document.querySelector('.messages').classList.remove('d-none');
-    document.querySelector('.chat-header').classList.remove('d-none');
-    document.querySelector('.chat-footer').classList.remove('d-none');
-    document.querySelector('.chat-contact-name').innerText = contactName;
-    
+  const current_id = "<%= id %>";
+  let contactUser = undefined;
+  let roomId = "";
 
-    // Leave the previous room if there is one
-    if (currentRoom) {
-      socket.emit('leaveRoom', currentRoom);
-    }
-
-    // Join the new room
-    currentRoom = contactEmail; // Assuming email is used as room identifier
-    socket.emit('startChat', currentRoom);
+  function generateRoomId(userId1, userId2) {
+    return [userId1, userId2].sort().join("_");
   }
 
-  const $messagesContainer = document.querySelector('.messages')
+  async function showChat(element, userDataString) {
+    const user = JSON.parse(userDataString);
+    document.querySelector(".initial-message").classList.add("d-none");
+    document.querySelector(".messages").classList.remove("d-none");
+    document.querySelector(".chat-header").classList.remove("d-none");
+    document.querySelector(".chat-footer").classList.remove("d-none");
+    document.querySelector(".chat-contact-name").innerText = user.name;
+    document.querySelector(".message-avatar").src =
+      user.profilePicture || "https://via.placeholder.com/50";
+    contactUser = user;
+    // Clear previous messages
+    document.querySelector(".messages").innerHTML = "";
 
-  document.querySelector('#message-form').addEventListener('submit', (e) => {
+    roomId = generateRoomId(contactUser._id, current_id);
+    console.log(user.email);
+    socket.emit("join", { room: roomId, matchedUserEmail: user.email });
+
+    const messages = await fetchMessages(roomId);
+  }
+
+  const $messagesContainer = document.querySelector(".messages");
+
+  document.querySelector("#message-form").addEventListener("submit", (e) => {
     e.preventDefault();
-    const input = document.querySelector('#input');
-    if (input.value && currentRoom) {
-      socket.emit('message', { room: currentRoom, message: input.value });
-      input.value = '';
-      const messageText = input.value;
-      addMessage(messageText, 'sent')
+
+    const input = document.querySelector("#input");
+    // Get message text
+    let msg = input.value;
+
+    msg = msg.trim();
+
+    if (!msg) {
+      return false;
     }
+    // Emit message to server
+    let senderEmail = "<%= email %>";
+
+    socket.emit("sendMessage", {
+      room: roomId,
+      message: msg,
+      sender: "<%= email %>",
+    });
+    // Clear input
+    input.value = "";
+    input.focus();
   });
 
   function addMessage(text, type) {
-    const messageElement = document.createElement('div')
-    messageElement.classList.add('message', type)
-    messageElement.innerText = text
-    $messagesContainer.appendChild(messageElement)
+    const messageElement = document.createElement("div");
+    messageElement.classList.add("message", type);
+    messageElement.textContent = text;
+    $messagesContainer.appendChild(messageElement);
   }
 
-  socket.on('connect', () => {
-    console.log('Connected to server');
+  async function fetchMessages(roomId) {
+    const url = `/messages/${roomId}`;
+    console.log(`Fetching messages from URL: ${url}`); // Log the URL
+    try {
+      const response = await fetch(`/messages/${roomId}`);
+      const messages = await response.json();
+      messages.forEach((message) => {
+        const messageType =
+          message.sender === "<%= email %>" ? "sent" : "received";
+        addMessage(message.text, messageType);
+      });
+    } catch (error) {
+      console.error("Failed to fetch messages:", error);
+      return [];
+    }
+  }
+
+  socket.on("connect", () => {
+    console.log("Connected to server");
   });
 
-  socket.on('disconnect', () => {
-    console.log('Disconnected from server');
+  socket.on("disconnect", () => {
+    console.log("Disconnected from server");
   });
 
-  socket.on('chatStarted', (message) => {
-    console.log(message);
-  });
+  socket.on("message", (message) => {
+    const messageType = message.sender === "<%= email %>" ? "sent" : "received";
 
-  socket.on('message', (msg) => {
-    console.log(msg);
+    addMessage(message.text, messageType);
   });
 </script>
 
-<%- include("../partials/footer", {currentPath: currentPath }) %> 
+<%- include("../partials/footer", {currentPath: currentPath }) %>
