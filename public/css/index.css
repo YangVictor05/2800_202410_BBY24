@@ -69,10 +69,12 @@ header, footer {
     margin-top: 0.5em;
     margin-left: 0.5em;
     font-size: 1.2em;
+    text-decoration: none;
 }
 .user-details > p {
     margin-left: 0.5em;
     font-size: 0.8em;
+    text-decoration: none;
 }
 .profile-image {
     margin-left: 0.5em;
@@ -95,6 +97,17 @@ header, footer {
 }
 
 .user-details {
+    width: 95%;
+    position: relative;
     display: flex;
     flex-direction: column;
 }
+
+.bottom-right-link {
+    font-size: 0.8em;
+    color: black;
+    text-align: right;
+    margin-bottom: 0.5em;
+    margin-right: 1em; /* Distance from the right edge of the card */
+    text-decoration: none; /* Removes the default underline from the link */
+  }
