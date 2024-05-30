@@ -1,12 +1,12 @@
-    <div id="matched-template">
+<div id="matched-template">
         <div class="recent-image"> 
-            <img src="<%= matchuser.profilePicture %>" alt=""> 
+            <img src="<%= saveduser.profilePicture %>" alt=""> 
         </div>
         <div class="user-details">
-            <h4 id="name"><%= matchuser.name %></h4>
-            <p>Biography: <%= matchuser.biography %></p> 
+            <h4 id="name"><%= saveduser.name %></h4>
+            <p>Biography: <%= saveduser.biography %></p> 
             <form action="/chattingnow" method="post" style="justify-content: right; margin-bottom: 0.5em; margin-right: 0.5em;">
-                <input type="hidden" name="matchEmail" value="<%= matchuser.email %>">
+                <input type="hidden" name="matchEmail" value="<%= saveduser.email %>">
             <button class="mybutton" style="font-size: 0.6em;">Chat with user</button>
             </form>
         </div>

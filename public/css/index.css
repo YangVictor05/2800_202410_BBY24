@@ -48,7 +48,9 @@ header, footer {
 .event-title {
     font-size: 14px;
 }
-
+.bottomwhitespace {
+    height: 10vh;
+  }
 .read-more {
     color: white;
     text-decoration: none;

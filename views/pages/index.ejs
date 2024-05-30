@@ -1,5 +1,5 @@
 <%- include("../partials/header_after") %> 
-<link rel="stylesheet" href="/public/css/">
+<link rel="stylesheet" href="/css/index.css">
 
 <%- include("../partials/header_between") %> 
 <!-- <h1>Hello</h1> -->
@@ -12,12 +12,13 @@
 <h2>Saved users</h2>
 <div id="people">
     <% if (users.length > 0) { %>
-        <% let j=0; %>
-        <% for(j=0; j < Math.floor(3, users.length); j++) { %>
-        <%- include('../templates/recentcard', {matchuser: users[j]})  %> 
-         <% } %> 
+        <% for(i=0; i < Math.min(users.length, 3); i++) { %>
+            <% console.log(users[i]);%>
+            <%- include('../templates/recentcard', {saveduser: users[i]})  %> 
+        <% } %> 
       <% } else { %>
       <% } %>
 </div>
+<div class="bottomwhitespace"></div>
 
 <%- include("../partials/footer", {currentPath: currentPath }) %> 

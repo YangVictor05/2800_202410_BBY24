@@ -252,16 +252,22 @@ app.get('/home', async (req, res) => {
     const user = await matchuserCollection.findOne(query);
     const save = user.matchuser_email;
     const querysave = { email: { $in: save } };
+    const events = await eventInfoCollection.find().toArray();
+  try {
     const saveuser = await userCollection.find(querysave).toArray();
     const usersWithDefaultPics = saveuser.map(user => ({
       ...user,
       profilePicture: user.profilePicture || '/img/default-profile.png'
     }));
-    const events = await eventInfoCollection.find().toArray();
-    console.log(saveuser);
+
     console.log("==============================");
     console.log(req.session.name);
     res.render('pages/index', { loggedIn, username: req.session.name, event: events, users: usersWithDefaultPics, currentPath: req.path });
+
+
+  } catch (error) {
+    res.status(500).send('Error accessing user data');
+  }
   } else {
     res.render('pages/landing');
   }
