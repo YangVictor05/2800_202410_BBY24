@@ -618,6 +618,28 @@ app.post('/chattingnow', async (req, res) => {
     res.redirect('/login');
     return;
   }
+  
+  const matchUserEmail = req.body.matchEmail;
+  const currentUserEmail = req.session.email
+
+  console.log(req.session.name);
+  // Update current user's matchuser_email array
+  const queryCurrentUser  = { email: req.session.email };
+  const updateCurrentUser  = {
+    $addToSet: {
+      matchuser_email: matchUserEmail
+    }
+  };
+
+  await matchuserCollection.updateOne(queryCurrentUser , updateCurrentUser );
+  // Update matched user's matchuser_email array
+  const queryMatchedUser = { email: matchUserEmail };
+  const updateMatchedUser = {
+    $addToSet: {
+      matchuser_email: currentUserEmail
+    }
+  };
+  await matchuserCollection.updateOne(queryMatchedUser, updateMatchedUser);
   res.redirect('/chat');
 });
 
@@ -742,6 +764,43 @@ app.get("/messages/:roomId", async (req, res) => {
   }
 });
 
+// Retrieve emails from DB by userIds
+app.get("/users/:userId", async (req, res) => {
+  const { userId } = req.params;
+  const _id = ObjectId(userId);
+  try {
+    const user = await userCollection.findOne({ _id: _id });
+    console.log(user.email);
+    
+    if (!user) {
+      return res.status(404).send({ message: 'User not found' });
+    }
+
+    res.status(200).send({ email: user.email });
+  } catch (error) {
+    res.status(500).send({ message: 'Error retrieving user', error });
+  }
+});
+
+
+// Delete user and messages from DB 
+app.delete('/matchusers/:email', async (req, res) => {
+  const email = req.params.email;
+  try {
+    const result = await matchuserCollection.updateMany(
+      {},
+      { $pull: { matchuser_email: email } }
+    );
+    if (result.modifiedCount === 0) {
+      return res.status(404).send({ message: 'Email not found in any user match list' });
+    }
+    res.status(200).send({ message: 'Email removed from match lists successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({ message: 'An error occurred while updating the user match lists' });
+  }
+
+});
 const generateMessage = (text) => {
   return {
     text,
