@@ -47,7 +47,8 @@ body {
     /* grid-template-columns: auto auto auto; */
     padding: 10px;
     background-color: #2A8386; 
-    /* position: relative; */
+    position: fixed;
+    width: 100%;
   }
 
 .grid-header a.icon {
@@ -136,4 +137,8 @@ footer {
     padding-left: 1px;
     transform: scale(0.7);
     cursor: pointer;
+}
+
+.bottomwhitespace {
+    height: 120px;
 }
