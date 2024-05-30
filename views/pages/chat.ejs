@@ -1,5 +1,6 @@
 <%- include("../partials/header_after") %>
 
+
 <div class="container-fluid">
   <div class="row">
     <!-- Chat List -->
@@ -55,8 +56,14 @@
 
         <!-- Messages -->
         <div class="messages d-none">
-          <div class="message received">Hello!</div>
-          <div class="message sent">Hi there!</div>
+          <div class="message received">
+            Hello!
+            <span class="message-time">10:30 AM</span>
+          </div>
+          <div class="message sent">
+            Hi there!
+            <span class="message-time">10:32 AM</span>
+          </div>
           <!-- Add more messages as needed -->
         </div>
       </div>
@@ -146,12 +153,29 @@
     input.focus();
   });
 
-  function addMessage(text, type) {
+  function addMessage(text, type, time) {
     const messageElement = document.createElement("div");
     messageElement.classList.add("message", type);
     messageElement.textContent = text;
+
+    const timeElement = document.createElement("span");
+    timeElement.classList.add("message-time");
+    
+    timeElement.textContent = formatTimestamp(time);
+
+    messageElement.appendChild(timeElement);
     $messagesContainer.appendChild(messageElement);
   }
+
+  function formatTimestamp(timestamp) {
+  const date = new Date(timestamp);
+  const hours = date.getHours();
+  const minutes = date.getMinutes();
+  const ampm = hours >= 12 ? 'PM' : 'AM';
+  const formattedHours = hours % 12 || 12; // Convert to 12-hour format
+  const formattedMinutes = minutes < 10 ? '0' + minutes : minutes; // Add leading zero if needed
+  return `${formattedHours}:${formattedMinutes} ${ampm}`;
+}
 
   async function fetchMessages(roomId) {
     const url = `/messages/${roomId}`;
@@ -162,7 +186,7 @@
       messages.forEach((message) => {
         const messageType =
           message.sender === "<%= email %>" ? "sent" : "received";
-        addMessage(message.text, messageType);
+        addMessage(message.text, messageType, message.createdAt);
       });
     } catch (error) {
       console.error("Failed to fetch messages:", error);
@@ -181,7 +205,8 @@
   socket.on("message", (message) => {
     const messageType = message.sender === "<%= email %>" ? "sent" : "received";
 
-    addMessage(message.text, messageType);
+    
+    addMessage(message.text, messageType, message.createdAt);
   });
 </script>
 
