@@ -257,7 +257,7 @@ app.get('/home', async (req, res) => {
     const saveuser = await userCollection.find(querysave).toArray();
     const usersWithDefaultPics = saveuser.map(user => ({
       ...user,
-      profilePicture: user.profilePicture || '/img/default-profile.png'
+      profilePicture: user.profilePicture || '/img/defaultprofilepic.png'
     }));
 
     console.log("==============================");
@@ -387,7 +387,7 @@ app.get('/profile', async (req, res) => {
       email: userProfile.email,
       age: userProfile.age,
       biography: userProfile.biography || '',  // Provide an empty string if biography is undefined
-      profilePicture: userProfile.profilePicture || '/img/default-profile.png', // Default profile picture
+      profilePicture: userProfile.profilePicture || '/img/defaultprofilepic.png', // Default profile picture
       currentPath: req.path
     });
   } catch (error) {
@@ -469,11 +469,13 @@ app.get('/signout', function (req, res) {
 });
 
 //Events skeleton
-app.get('/events', (req, res) => {
-  
-  const loggedIn = req.session.authenticated;
-  
-  res.render('pages/event_all', { loggedIn, currentPath: req.path });
+app.get('/events', async (req, res) => {
+  if (!req.session.authenticated) {
+    res.redirect('/login');
+    return;
+  }
+  const events = await eventInfoCollection.find().toArray();
+  res.render('pages/event_all', {currentPath: req.path, events: events});
 
 });
 
@@ -584,7 +586,7 @@ app.get('/matching', async (req, res) => {
     }).toArray();
     const usersWithDefaultPics = matchuser.map(user => ({
       ...user,
-      profilePicture: user.profilePicture || '/img/default-profile.png'
+      profilePicture: user.profilePicture || '/img/defaultprofilepic.png'
     }));
 
     console.log("=========================");
@@ -736,7 +738,7 @@ app.get("/chat", async (req, res) => {
       email: userProfile.email,
       age: userProfile.age,
       biography: userProfile.biography || "",
-      profilePicUrl: userProfile.profilePicUrl || "/img/default-profile.png",
+      profilePicUrl: userProfile.profilePicUrl || "/img/defaultprofilepic.png",
       currentPath: req.path,
       currentUser: matched_user,
       users: users,

@@ -14,7 +14,12 @@
         tune
       </span>
     </div>
-
+    <div id="event-container">
+      <% let i=0; %>
+      <% for(i=0; i < events.length; i++) { %>
+      <%- include('../templates/eventtemplate', {events: events[i]})  %> 
+      <% } %> 
+    </div>
     <div id="addeventbtn">
       <span class="material-symbols-outlined" id="circle">
         radio_button_unchecked
@@ -23,36 +28,6 @@
         add
       </span>
     </div>
-
-    <!-- template for the cards so that it can be displayed dynamically -->
-    <template id="eventcardtemplate">
-      <div class="eventcardbody">
-        <img src="..." alt="..." class="event_picture" onerror="this.onerror=null; this.src='/img/defaulteventpic.png'">
-        <div class="event_details">
-          <h3 class="event_title">Event Title</h5>
-            <h5 class="event_access">Event access</h5>
-            <div class="date">
-              <span class="material-symbols-outlined" id="calendar">
-                event
-              </span>
-              <h4 class="event_date">Event date</h4>
-            </div>
-            <div class="time">
-              <span class="material-symbols-outlined" id="clock">
-                schedule
-              </span>
-              <h4 class="event_time">Event time</h4>
-            </div>
-            <div class="location">
-              <span class="material-symbols-outlined" id="locationpin">
-                location_on
-              </span>
-              <h4 class="event_location">Event location</h4>
-            </div>
-            <h4 class="event_description">Event description here only 2 lines preview and </h4>
-        </div>
-      </div>
-    </template>
 
     <div class="bottomwhitespace"></div>
   </div>
