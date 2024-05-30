@@ -141,5 +141,9 @@ footer {
 }
 
 .bottomwhitespace {
-    height: 120px;
+    height: 100px;
+}
+
+.upperwhitespace {
+    height: 100px;
 }

@@ -470,10 +470,10 @@ app.get('/signout', function (req, res) {
 
 //Events skeleton
 app.get('/events', (req, res) => {
-  // Check if user is logged in from the session
+  
   const loggedIn = req.session.authenticated;
-  // Render the homepage template with the loggedIn status
-  res.render('pages/events', { loggedIn, currentPath: req.path });
+  
+  res.render('pages/event_all', { loggedIn, currentPath: req.path });
 
 });
 
@@ -494,25 +494,26 @@ app.get('/event_edit', async (req, res) => {
 });
 
 
-app.post('/submitEvent', parser.single('image'), async (req, res) => {
-  if (!req.session.authenticated) {
-    res.redirect('/login');
-    return;
-  }
-  //const imageUrl = req.file.path;
-  const { event_name, event_date, event_time, event_location,
-    event_access, event_description, event_fees, event_capacity } = req.body;
+app.post('/submitEvent', parser.single('event_picture'), async (req, res) => {
+  const loggedIn = req.session.authenticated;
+  const imageUrl = req.file.path; // Cloudinary URL
+  const { event_name, event_date, event_time, event_location, event_access, event_description, event_fees, event_capacity } = req.body;
 
   try {
     await eventInfoCollection.insertOne({
       email: req.session.email,
       eventName: event_name,
-      eventDate: event_date, eventTime: event_time,
-      eventLocation: event_location, eventAccess: event_access,
-      description: event_description, eventFees: event_fees, eventCapacity: event_capacity
+      eventDate: event_date,
+      eventTime: event_time,
+      eventLocation: event_location,
+      eventAccess: event_access,
+      description: event_description,
+      eventFees: event_fees,
+      eventCapacity: event_capacity,
+      eventPicture: imageUrl
     });
 
-    res.render('pages/event_submitted', { loggedIn, currentPath: req.path });
+    res.redirect('/events'); // Redirect to the events page after submission
   } catch (error) {
     console.error('Error updating event info:', error);
     res.send("Failed to update event info.");

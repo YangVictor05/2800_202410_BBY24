@@ -8,7 +8,7 @@
   display: grid;
   justify-content: center;
   align-items: center;
-  height: 100vh;
+  height: fit-content;
 }
 
 h1 {
@@ -37,7 +37,9 @@ textarea {
   border-style: none;
   background-color: #3C9EA1;
   color: white;
-  margin-top: 40px;
+  margin-top: 10px;
+  border-radius: 10px;
+  
 }
 
 .cancel {
@@ -46,6 +48,8 @@ textarea {
   border-style: solid;
   background-color: white;
   color: #2A8386;
+  border-radius: 10px;
+  margin-top: 20px;
 }
 
 select option:hover {
@@ -64,4 +68,8 @@ input::file-selector-button {
   border: thin solid #3C9EA1;
   border-radius: 3px;
   font-weight: 400;
+}
+
+.bottomwhitespace {
+  height: 120px;
 }

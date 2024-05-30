@@ -1,10 +1,13 @@
 <%- include("../partials/header_after") %> 
-<link rel="stylesheet" href="/public/css/event_creation.css">
+<link rel="stylesheet" href="/css/event_creation.css">
 
 <%- include("../partials/header_between") %> 
+
+<div class="upperwhitespace"></div>
+
 <div class="content">
   <h1>Create an event</h1>
-  <form action="/submitEvent" method="post">
+  <form action="/submitEvent" method="post" enctype="multipart/form-data">
     <label for="event_picture">Upload a picture for your event</label> <br>
     <input type="file" id="event_picture" name="event_picture" accept="image/*">
     
@@ -47,4 +50,5 @@
   
 </div>
 <div class="bottomwhitespace"></div>
+
 <%- include("../partials/footer", {currentPath: currentPath }) %> 
