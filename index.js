@@ -55,6 +55,7 @@ var { database } = include('databaseConnection');
 const userCollection = database.db(mongodb_database).collection('users');
 const matchuserCollection = database.db(mongodb_database).collection('matchuser');
 const messagesCollection = database.db(mongodb_database).collection("messages");
+const eventInfoCollection = database.db(mongodb_database).collection("event_Info");
 
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
@@ -256,10 +257,11 @@ app.get('/home', async (req, res) => {
       ...user,
       profilePicture: user.profilePicture || '/img/default-profile.png'
     }));
-
+    const events = await eventInfoCollection.find().toArray();
+    console.log(saveuser);
     console.log("==============================");
     console.log(req.session.name);
-    res.render('pages/index', { loggedIn, username: req.session.name, users: usersWithDefaultPics, currentPath: req.path });
+    res.render('pages/index', { loggedIn, username: req.session.name, event: events, users: usersWithDefaultPics, currentPath: req.path });
   } else {
     res.render('pages/landing');
   }
@@ -379,7 +381,8 @@ app.get('/profile', async (req, res) => {
       email: userProfile.email,
       age: userProfile.age,
       biography: userProfile.biography || '',  // Provide an empty string if biography is undefined
-      profilePicture: userProfile.profilePicture || '/img/default-profile.png' // Default profile picture
+      profilePicture: userProfile.profilePicture || '/img/default-profile.png', // Default profile picture
+      currentPath: req.path
     });
   } catch (error) {
     console.error('Error fetching user profile:', error);
@@ -467,6 +470,94 @@ app.get('/events', (req, res) => {
   res.render('pages/events', { loggedIn, currentPath: req.path });
 
 });
+
+app.get('/event_creation', (req, res) => {
+
+  const loggedIn = req.session.authenticated;
+
+  res.render('pages/event_creation', { loggedIn, currentPath: req.path });
+
+});
+
+app.get('/event_edit', async (req, res) => {
+  if (!req.session.authenticated) {
+    res.redirect('/login');
+    return;
+  }
+  res.render('pages/event_edit', { currentPath: req.path });
+});
+
+
+app.post('/submitEvent', parser.single('image'), async (req, res) => {
+  if (!req.session.authenticated) {
+    res.redirect('/login');
+    return;
+  }
+  //const imageUrl = req.file.path;
+  const { event_name, event_date, event_time, event_location,
+    event_access, event_description, event_fees, event_capacity } = req.body;
+
+  try {
+    await eventInfoCollection.insertOne({
+      email: req.session.email,
+      eventName: event_name,
+      eventDate: event_date, eventTime: event_time,
+      eventLocation: event_location, eventAccess: event_access,
+      description: event_description, eventFees: event_fees, eventCapacity: event_capacity
+    });
+
+    res.render('pages/event_submitted', { loggedIn, currentPath: req.path });
+  } catch (error) {
+    console.error('Error updating event info:', error);
+    res.send("Failed to update event info.");
+  }
+});
+
+app.post('/editevent', async (req, res) => {
+  const loggedIn = req.session.authenticated;
+
+  const { event_name, event_date, event_time, event_location,
+    event_access, event_description, event_fees, event_capacity } = req.body;
+
+  await eventInfoCollection.updateOne(
+    {
+      email: req.session.email,
+      eventName: event_name
+    },
+    {
+      $set: {
+        eventName: event_name,
+        eventDate: event_date, eventTime: event_time,
+        eventLocation: event_location, eventAccess: event_access,
+        description: event_description, eventFees: event_fees, eventCapacity: event_capacity
+      }
+    }
+  );
+  res.render('pages/event_submitted', { loggedIn, currentPath: req.path });
+});
+
+app.post('/event_deletebutton', async (req, res) => {
+  const loggedIn = req.session.authenticated;
+  const { event_name, event_date, event_time, event_location,
+    event_access, event_description, event_fees, event_capacity } = req.body;
+
+  const result = await eventInfoCollection.deleteOne(
+    {
+      email: req.session.email,
+      eventName: event_name
+    },
+  );
+  if (result.deletedCount === 0) {
+    return res.status(404).send("No event found with the provided criteria");
+  }
+  res.render('pages/events', { loggedIn, currentPath: req.path });
+});
+
+app.post('/event_cancelbutton', (req, res) => {
+  const loggedIn = req.session.authenticated;
+  res.render('pages/events', { loggedIn, currentPath: req.path });
+});
+
 
 app.get('/matching', async (req, res) => {
   if (!req.session.authenticated) {

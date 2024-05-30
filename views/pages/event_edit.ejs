@@ -1,7 +1,7 @@
 <%- include("../partials/header_after") %> 
 <div class="content">
   <h1>Edit your event</h1>
-  <form action="/views/pages/event_submitted.html" method="post">
+  <form action="/editevent" method="post">
     <label for="event_picture">Upload a picture for your event</label> <br>
     <input type="file" id="event_picture" name="event_picture" accept="image/*">
     
@@ -35,11 +35,14 @@
     <label for="event_capacity">Seats or capacity:</label>
     <input type="number" id="event_capacity" name="event_capacity">
 
+    <button class="edit" type="submit">Edit Event</button>
+    </form>
     
-    <input type="submit" value="Edit Event" class="edit">
-    <input type="button" value="Cancel" class="cancel">
-  </form>
-  <form action="/views/pages/event_submitted.html" method="post">
+    <form action="/event_cancelbutton" method="post">
+      <button type="submit" class="cancel">Cancel</button>
+    </form>
+  
+  <form action="/event_deletebutton" method="post">
     <input type="submit" value="Delete Event" class="delete">
   </form>
 </div>
