@@ -15,7 +15,7 @@
         <div class="chat-item">
           <input type="checkbox" class="select-user d-none" data-user-id="<%= user._id %>">
           <img
-            src="<%= user.profilePicture || 'https://via.placeholder.com/50' %>"
+            src="<%= user.profilePicture || '/img/default-profile.pngn' %>"
             class="chat-avatar"
             alt="Avatar"
           />
@@ -41,7 +41,7 @@
         class="d-flex align-items-center p-3 border-bottom chat-header d-none"
       >
         <img
-          src="https://via.placeholder.com/50"
+          src="/img/default-profile.png"
           class="chat-avatar message-avatar"
           alt="Avatar"
         />
@@ -223,12 +223,67 @@
     }
   }
 
-  function deleteSelectedUsers() {
+  async function deleteSelectedUsers() {
+    const deletedUsers = [];
+    
     const selectedCheckboxes = document.querySelectorAll(".select-user:checked");
+    const userIds = Array.from(selectedCheckboxes).map(checkbox => checkbox.dataset.userId);
+    console.log(userIds);
+    const deletedEmails = await fetchEmails(userIds)
+    console.log(deletedEmails);
+    await deleteUsers(deletedEmails)
     selectedCheckboxes.forEach(checkbox => {
       const userElement = checkbox.closest(".chat-item");
       userElement.remove();
+      
     });
+  }
+
+  async function fetchEmails(userIds){
+    const emails = []
+    for (const userId of userIds){
+      const url = `/users/${userId}`;
+      try{
+        const response = await fetch(url, {
+          method: 'GET'
+        });
+
+        if(!response.ok) {
+          throw new Error(`Failed to fetch user emails with user id: ${userId}`);
+        }
+        
+
+        const data = await response.json();
+        // console.log(data);
+        emails.push(data.email);
+      }
+      catch (error){
+        console.error('Error fetching emails:', error);
+        return [];
+
+      }
+    }
+    console.log(emails);
+    return emails;
+  }
+
+  async function deleteUsers(emails) {
+    for (const email of emails) {
+    const url = `/matchusers/${email}`;
+    try {
+      const response = await fetch(url, {
+        method: 'DELETE'
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to delete user with email: ${email}`);
+      }
+
+      console.log(`Successfully deleted user with email: ${email}`);
+    } catch (error) {
+      console.error(error.message);
+    }
+  }
   }
 
 
