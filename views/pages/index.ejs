@@ -1,4 +1,7 @@
 <%- include("../partials/header_after") %> 
+<link rel="stylesheet" href="/public/css/">
+
+<%- include("../partials/header_between") %> 
 <!-- <h1>Hello</h1> -->
 <div id="event-container">
     <% let i=0; %>
@@ -16,4 +19,5 @@
       <% } else { %>
       <% } %>
 </div>
+
 <%- include("../partials/footer", {currentPath: currentPath }) %> 
