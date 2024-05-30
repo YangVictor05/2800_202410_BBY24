@@ -49,6 +49,7 @@ body {
     background-color: #2A8386; 
     position: fixed;
     width: 100%;
+    z-index: 1000; /* Ensures the header is on top of other elements */
   }
 
 .grid-header a.icon {
