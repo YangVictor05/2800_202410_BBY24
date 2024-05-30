@@ -3,6 +3,11 @@
     </a>
       <img src="<%= events.eventPicture%>" alt="..." class="event_picture" onerror="this.onerror=null; this.src='/img/defaulteventpic.png'">
       <div class="event_details">
+        <button class="editbtn">
+          <span class="material-symbols-outlined" id="editicon">
+            edit_square
+          </span>
+        </button>
         <h3 class="event_title"><%= events.eventName %></h5>
           <h5 class="event_access">Event access</h5>
           <div class="date">
