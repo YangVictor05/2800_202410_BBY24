@@ -27,10 +27,10 @@ body {
     color: white;
     display: flex;
     align-items: center;
-    justify-self: center;
     margin: auto;
+    justify-self: center;
     width: fit-content;
-    padding: 10px;
+    padding: 10px 10px 10px 0;
 }
 
 .logo {
@@ -43,18 +43,19 @@ body {
     font-weight: bold;
 }
 .grid-header {
-    display: grid;
-    grid-template-columns: auto auto auto;
+    display: flex;
+    /* grid-template-columns: auto auto auto; */
     padding: 10px;
     background-color: #2A8386; 
-    position: relative;
+    /* position: relative; */
   }
 
 .grid-header a.icon {
-    display: block;
-    position: relative;
-    left:10px;
-    padding-top: 13px;
+    /* display: block; */
+    position: absolute;
+    left: 25px;
+    padding-top: 11px;
+    align-items: center;
     font-size: 25px; /* Adjust the font size as per your design */
     color: white; /* Sets the color of the icon */
 }
@@ -128,7 +129,7 @@ footer {
     display: block;
     position: absolute;  /* Changed from 'relative' to 'absolute' */
     right: 10px;         /* Adjust as needed to control distance from the right edge */
-    top: 10px;           /* Adjust as needed to control distance from the top */
+    top: 8px;           /* Adjust as needed to control distance from the top */
     padding-top: 1px;    /* Reduced padding to make the button appear smaller */
     padding-right: 1px;  /* You can adjust padding on all sides as needed */
     padding-bottom: 1px;
