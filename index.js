@@ -522,6 +522,14 @@ app.post('/submitEvent', parser.single('event_picture'), async (req, res) => {
   }
 });
 
+app.get('/view_event/:eventId', async (req, res) => {
+  const { eventId } = req.params;
+  const loggedIn = req.session.authenticated;
+  const event = await eventInfoCollection.findOne({_id: ObjectId(eventId)});
+  console.log(event._id);
+  res.render('pages/event_view', {loggedIn, currentPath: req.path, event: event})
+});
+
 app.post('/editevent', async (req, res) => {
   const loggedIn = req.session.authenticated;
 

@@ -1,4 +1,6 @@
    <div class="eventcardbody">
+    <a href="/view_event/<%= events._id %>" style="text-decoration: none" id="event">
+    </a>
       <img src="<%= events.eventPicture%>" alt="..." class="event_picture" onerror="this.onerror=null; this.src='/img/defaulteventpic.png'">
       <div class="event_details">
         <h3 class="event_title"><%= events.eventName %></h5>
