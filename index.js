@@ -699,13 +699,14 @@ app.get("/chat", async (req, res) => {
   const matched_user = await matchuserCollection.findOne(query);
 
   const matched_users = matched_user.matchuser_email;
-
   const users = [];
   for (const user_email of matched_users) {
     const current_user = await userCollection.findOne({ email: user_email });
-    if (!users.some((user) => user.email === current_user.email)) {
-      users.push(current_user);
-    }
+      if(current_user != null) {
+        if (!users.some((user) => user.email === current_user.email)) {
+          users.push(current_user);
+        }
+      }
   }
 
   if (matched_users == null || matched_users.length === 0) {
