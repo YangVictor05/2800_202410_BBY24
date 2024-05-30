@@ -7,11 +7,13 @@
 <div class="container">
   <div class="header">
     <button class="backbtn">
+      <a href="/events" style="text-decoration: none; color: inherit;"></a>
       <span class="material-symbols-outlined" id="backbtn">
         arrow_back_ios
       </span>
+     </a>
     </button>
-    <h1><a href="/events" style="text-decoration: none; color: inherit;">Back to events</a></h1>
+    <h1>Back to events</h1>
   </div>
 
   <div class="eventcardbody">
@@ -24,7 +26,7 @@
             <span class="material-symbols-outlined" id="calendar">
               event
             </span>
-            <h4 class="event_date"><%=event.eventName %></h4>
+            <h4 class="event_date"><%=event.eventDate %></h4>
           </div>
           <div class="time">
             <span class="material-symbols-outlined" id="clock">
