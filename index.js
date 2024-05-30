@@ -522,11 +522,23 @@ app.post('/submitEvent', parser.single('event_picture'), async (req, res) => {
   }
 });
 
-app.get('/view_event/:eventId', async (req, res) => {
+app.get('/view_event', async (req, res) => {
   const { eventId } = req.params;
   const loggedIn = req.session.authenticated;
   const event = await eventInfoCollection.findOne({_id: ObjectId(eventId)});
   console.log(event._id);
+  res.render('pages/event_view', {loggedIn, currentPath: req.path, event: event})
+});
+
+app.get('/myevent', async (req, res) => {
+  const loggedIn = req.session.authenticated;
+ // const { eventId } = req.params;
+  const email = req.session.email;
+  const event = await eventInfoCollection.findOne({
+    email: email,
+  });
+;
+  console.log(event);
   res.render('pages/event_view', {loggedIn, currentPath: req.path, event: event})
 });
 
@@ -550,7 +562,7 @@ app.post('/editevent', async (req, res) => {
       }
     }
   );
-  res.render('pages/event_submitted', { loggedIn, currentPath: req.path });
+  res.render('pages/event_all', { loggedIn, currentPath: req.path });
 });
 
 app.post('/event_deletebutton', async (req, res) => {
