@@ -14,8 +14,7 @@ header, footer {
 
 #event-container, #people {
     width: 90%;
-    margin: auto;
-    /* margin: 15px auto; */
+    margin: 15px auto;
 }
 
 .event-template {
