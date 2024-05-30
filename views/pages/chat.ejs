@@ -5,24 +5,28 @@
   <div class="row">
     <!-- Chat List -->
     <div class="col-12 col-md-4 chat-list d-none d-md-block">
+      
       <% users.forEach(user => { %>
-      <div
-        class="chat-item"
-        onclick="showChat(this, '<%= JSON.stringify(user) %>')"
-      >
-        <img
-          src="<%= user.profilePicture || 'https://via.placeholder.com/50' %>"
-          class="chat-avatar"
-          alt="Avatar"
-        />
-        <div class="chat-info">
-          <div class="chat-name"><%= user.name %></div>
-          <div class="chat-last-message">
-            Last message from <%= user.name %>
+        <div class="chat-item">
+          <input type="checkbox" class="select-user d-none" data-user-id="<%= user._id %>">
+          <img
+            src="<%= user.profilePicture || 'https://via.placeholder.com/50' %>"
+            class="chat-avatar"
+            alt="Avatar"
+          />
+          <div class="chat-info" onclick="showChat(this, '<%= JSON.stringify(user) %>')">
+            <div class="chat-name"><%= user.name %></div>
+            <div class="chat-last-message">Last message from <%= user.name %></div>
           </div>
         </div>
-      </div>
       <% }) %>
+      <div class="edit-container">
+        <button class="btn btn-secondary edit-btn" onclick="toggleEditOptions()">Edit</button>
+        <div class="edit-options d-none">
+          <button class="btn btn-primary pin-btn" onclick="pinToTop()">Pin to top</button>
+          <button class="btn btn-danger delete-btn" onclick="deleteSelectedUsers()">Delete</button>
+        </div>
+      </div>
     </div>
 
     <!-- Chat Messages -->
@@ -193,6 +197,35 @@
       return [];
     }
   }
+
+  function toggleEditOptions() {
+    const editOptions = document.querySelector(".edit-options");
+    const selectUserCheckboxes = document.querySelectorAll(".select-user");
+
+    editOptions.classList.toggle("d-none");
+    selectUserCheckboxes.forEach(checkbox => {
+      checkbox.classList.toggle("d-none");
+    });
+  }
+
+  function pinToTop() {
+    const selectedCheckbox = document.querySelector(".select-user:checked");
+    if (selectedCheckbox) {
+      const userId = selectedCheckbox.dataset.userId;
+      const userElement = selectedCheckbox.closest(".chat-item");
+      const chatList = document.querySelector(".chat-list");
+      chatList.insertBefore(userElement, chatList.firstChild);
+    }
+  }
+
+  function deleteSelectedUsers() {
+    const selectedCheckboxes = document.querySelectorAll(".select-user:checked");
+    selectedCheckboxes.forEach(checkbox => {
+      const userElement = checkbox.closest(".chat-item");
+      userElement.remove();
+    });
+  }
+
 
   socket.on("connect", () => {
     console.log("Connected to server");

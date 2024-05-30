@@ -144,3 +144,27 @@
   max-height: 400px; /* Adjust as needed */
   overflow-y: auto;
 }
+
+
+.chat-list {
+  padding: 15px;
+}
+
+.edit-container {
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.edit-options {
+  margin-top: 10px;
+}
+
+.select-user {
+  margin-right: 10px;
+}
+
+.select-user:not(.d-none) {
+  display: inline-block;
+}
