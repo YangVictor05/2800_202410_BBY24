@@ -27,8 +27,9 @@ body {
     color: white;
     display: flex;
     align-items: center;
+    justify-self: center;
     margin: auto;
-    width: 65%;
+    width: fit-content;
     padding: 10px;
 }
 

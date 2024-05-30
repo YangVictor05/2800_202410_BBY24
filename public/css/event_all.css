@@ -97,7 +97,7 @@ input::file-selector-button {
 .event_picture {
   border-radius: 10px;
   height: 21vh;
-  width: 37vw;
+  width: fit-content, 37vw;
   object-fit: contain;
 }
 
