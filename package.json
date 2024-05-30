@@ -11,10 +11,7 @@
   "license": "ISC",
   "dependencies": {
     "bcrypt": "^5.1.1",
-<<<<<<< HEAD
     "cloudinary": "^1.21.0",
-=======
->>>>>>> 135b5e9af78596fe315174b949df4ffb17c91d19
     "connect-mongo": "^4.6.0",
     "dotenv": "^16.4.5",
     "ejs": "^3.1.10",
