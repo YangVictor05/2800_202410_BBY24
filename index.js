@@ -522,11 +522,11 @@ app.post('/submitEvent', parser.single('event_picture'), async (req, res) => {
   }
 });
 
-app.get('/view_event/:eventId', async (req, res) => {
-  const { eventId } = req.params;
+app.post('/view_event', async (req, res) => {
   const loggedIn = req.session.authenticated;
+  const eventId = req.body.eventId;
+  console.log(eventId);
   const event = await eventInfoCollection.findOne({_id: ObjectId(eventId)});
-  console.log(event._id);
   res.render('pages/event_view', {loggedIn, currentPath: req.path, event: event})
 });
 

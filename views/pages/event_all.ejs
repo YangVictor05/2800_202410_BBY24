@@ -20,7 +20,7 @@
     <div id="event-container">
       <% let i=0; %>
       <% for(i=0; i < events.length; i++) { %>
-      <%- include('../templates/eventtemplate', {events: events[i]})  %> 
+      <%- include('../templates/eventtemplate', {events: events[i], num: i})  %> 
       <% } %> 
     </div>
     <div id="addeventbtn">
