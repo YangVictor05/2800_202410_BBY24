@@ -14,7 +14,9 @@ header, footer {
 
 #event-container, #people {
     width: 90%;
-    margin: 15px auto;
+    margin-left: auto;
+    margin-right: auto;
+
 }
 
 .event-template {
@@ -49,7 +51,7 @@ header, footer {
     font-size: 14px;
 }
 .bottomwhitespace {
-    height: 10vh;
+    height: 7vh;
   }
 .read-more {
     color: white;
@@ -117,11 +119,6 @@ header, footer {
     text-decoration: none; /* Removes the default underline from the link */
   }
 
-
-.bottomwhitespace {
-    height: 120px;
-}
-
 .upperwhitespace {
-    height: 100px;
+    height: 9vh;
 }
