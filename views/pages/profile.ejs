@@ -7,7 +7,7 @@
 <div class="profile-page-container">
   <div class="profile-container">
     <div class="profile-header">
-      <img src="<%= profilePicture %>" alt="Profile Picture" class="profile-picture" id="profile-picture">
+      <img src="<%= profilePicture ? profilePicture : '/img/defaultprofilepic.png' %>" alt="Profile Picture" class="profile-picture" id="profile-picture">
       <h1 class="profile-name"><%= name %></h1>
       <p class="profile-email"><%= email %></p>
     </div>
