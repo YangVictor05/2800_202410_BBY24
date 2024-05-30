@@ -138,6 +138,7 @@ p {
 }
 
 #backbtn {
+  display: flex;
   color: #3C9EA1;
   scale: 1.1;
 
@@ -147,6 +148,7 @@ p {
 }
 
 .backbtn {
+  display: flex;
   border: none;
   background-color: transparent;
   margin-top: 8px;

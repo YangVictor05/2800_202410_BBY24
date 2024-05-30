@@ -163,7 +163,7 @@ h5 {
 .editbtn {
   border: none;
   background-color: transparent;
-  visibility: visible;
+  visibility: visible; /* change to visibility: hidden; when user is NOT the host of the event*/
   position: absolute;
   right: 17%;
 }
