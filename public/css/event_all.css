@@ -6,8 +6,8 @@
 .container {
   display: grid;
   justify-content: center;
-  margin-left: 10%;
-  margin-right: 10%;
+  /* margin-left: 10%;
+  margin-right: 10%; */
   /* margin-top: 60px; */
 }
 
@@ -42,7 +42,7 @@ input::file-selector-button {
   justify-items: center;
   color: #3C9EA1;
   scale: 3;
-  position: absolute;
+  position: fixed;
   bottom: 20vh;
   right: 10vw;
   
@@ -153,8 +153,30 @@ h5 {
 }
 
 .bottomwhitespace {
-  height: 120px;
+  height: 100px;
 }
+
+#event-container {
+  width: 100%;
+}
+
+.editbtn {
+  border: none;
+  background-color: transparent;
+  visibility: visible;
+  position: absolute;
+  right: 17%;
+}
+
+#editicon {
+  color: #3C9EA1;
+  
+  font-variation-settings:
+  'FILL' 0,
+  'wght' 400,
+  'opsz' 37
+}
+
 @media screen and (min-width: 320px) {
 
 }
