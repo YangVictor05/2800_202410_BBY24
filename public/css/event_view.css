@@ -206,6 +206,9 @@ p {
   margin-right: 10px;
 }
 
+.upperwhitespace {
+  height: 100px;
+}
 @media screen and (min-width: 320px) {
 
 }
