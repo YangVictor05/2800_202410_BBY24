@@ -9,8 +9,8 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 100vh;
-    padding-top: 60px; /* Adjust to give space for the header */
+    height: 100vh;
+    /* padding-top: 100px; Adjust to give space for the header */
 }
 
 .profile-container {

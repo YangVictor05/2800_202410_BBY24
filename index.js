@@ -16,6 +16,7 @@ const app = express();
 const router = express.Router();
 const Joi = require("joi");
 const expireTime = 1 * 60 * 60 * 1000; //expires after 1 hour  (minutes * seconds * millis)
+const http = require('http');
 
 //Cloudinary config.
 cloudinary.config({
@@ -38,6 +39,10 @@ const parser = multer({ storage: storage });
 
 app.use(express.urlencoded({ extended: false }));
 
+
+
+
+
 // Mongodb setup
 const mongodb_host = process.env.MONGODB_HOST;
 const mongodb_user = process.env.MONGODB_USER;
@@ -49,6 +54,8 @@ const node_session_secret = process.env.NODE_SESSION_SECRET;
 var { database } = include('databaseConnection');
 const userCollection = database.db(mongodb_database).collection('users');
 const matchuserCollection = database.db(mongodb_database).collection('matchuser');
+const messagesCollection = database.db(mongodb_database).collection("messages");
+const eventInfoCollection = database.db(mongodb_database).collection("event_Info");
 
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
@@ -73,10 +80,19 @@ app.use(session({
 app.use('/img', express.static(__dirname + '/public/img'));
 app.use('/css', express.static(__dirname + '/public/css'));
 
-app.listen(port, () => {
+
+
+// Socket.io setup
+const socketIo = require('socket.io');
+const server = http.createServer(app);
+const io = socketIo(server);
+
+server.listen(port, () => {
   console.log("Node application listening on port " + port);
 });
 
+
+//Password reset
 
 //Set up mailing service
 const nodemailer = require('nodemailer')
@@ -130,8 +146,6 @@ function get_html_message(name, text) {
   `
 }
 
-
-
 app.get('/reset', (req, res) => {
   var message = req.query.msg ? req.query.msg : '';
   res.render('pages/forgot-password', { msg: message });
@@ -146,7 +160,7 @@ app.post('/forgot-password', async (req, res) => {
     const oldUser = await userCollection.findOne({ email });
     if (!oldUser) {
       console.log("Use Not found");
-      return res.redirect("/reset?msg=This is not a valid email.");
+      return res.redirect("/reset?msg=If you have an account with us, an email to reset your password has been sent to your inbox. Please check your email to proceed.");
     }
     const secret = JWT_SECRET + oldUser.password;
     const token = jwt.sign({ email: oldUser.email, id: oldUser._id }, secret, {
@@ -158,7 +172,7 @@ app.post('/forgot-password', async (req, res) => {
     console.log(oldUser);
 
     send_mail(oldUser.name, email, link);
-    return res.redirect("/reset?msg=An email to reset your password has been set to your inbox. Please check your email to proceed.");
+    return res.redirect("/reset?msg=If you have an account with us, an email to reset your password has been sent to your inbox. Please check your email to proceed.");
 
 
   } catch (error) { }
@@ -228,21 +242,33 @@ app.get('/', (req, res) => {
 });
 
 //Home Page
-app.get('/home', async(req, res) => {
+app.get('/home', async (req, res) => {
 
   const loggedIn = req.session.authenticated;
   if (loggedIn) {
-      const userEmail = req.session.email;
-      console.log(userEmail);
-      const query = { email: userEmail };
-      const user = await matchuserCollection.findOne(query);
-      const save = user.matchuser_email;
-      const querysave = { email: { $in: save } };
-      const saveuser = await userCollection.find(querysave).toArray();
-      console.log("==============================");
-      console.log(req.session.name);
-      res.render('pages/index', {loggedIn, username:req.session.name, users: saveuser, currentPath: req.path });
-     } else {
+    const userEmail = req.session.email;
+    console.log(userEmail);
+    const query = { email: userEmail };
+    const user = await matchuserCollection.findOne(query);
+    const save = user.matchuser_email;
+    const querysave = { email: { $in: save } };
+    const events = await eventInfoCollection.find().toArray();
+  try {
+    const saveuser = await userCollection.find(querysave).toArray();
+    const usersWithDefaultPics = saveuser.map(user => ({
+      ...user,
+      profilePicture: user.profilePicture || '/img/default-profile.png'
+    }));
+
+    console.log("==============================");
+    console.log(req.session.name);
+    res.render('pages/index', { loggedIn, username: req.session.name, event: events, users: usersWithDefaultPics, currentPath: req.path });
+
+
+  } catch (error) {
+    res.status(500).send('Error accessing user data');
+  }
+  } else {
     res.render('pages/landing');
   }
 });
@@ -361,7 +387,8 @@ app.get('/profile', async (req, res) => {
       email: userProfile.email,
       age: userProfile.age,
       biography: userProfile.biography || '',  // Provide an empty string if biography is undefined
-      profilePicture: userProfile.profilePicture || '/img/default-profile.png' // Default profile picture
+      profilePicture: userProfile.profilePicture || '/img/default-profile.png', // Default profile picture
+      currentPath: req.path
     });
   } catch (error) {
     console.error('Error fetching user profile:', error);
@@ -443,19 +470,108 @@ app.get('/signout', function (req, res) {
 
 //Events skeleton
 app.get('/events', (req, res) => {
-  // Check if user is logged in from the session
+  
   const loggedIn = req.session.authenticated;
-  // Render the homepage template with the loggedIn status
-  res.render('pages/events', { loggedIn, currentPath: req.path });
+  
+  res.render('pages/event_all', { loggedIn, currentPath: req.path });
 
 });
+
+app.get('/event_creation', (req, res) => {
+
+  const loggedIn = req.session.authenticated;
+
+  res.render('pages/event_creation', { loggedIn, currentPath: req.path });
+
+});
+
+app.get('/event_edit', async (req, res) => {
+  if (!req.session.authenticated) {
+    res.redirect('/login');
+    return;
+  }
+  res.render('pages/event_edit', { currentPath: req.path });
+});
+
+
+app.post('/submitEvent', parser.single('event_picture'), async (req, res) => {
+  const loggedIn = req.session.authenticated;
+  const imageUrl = req.file.path; // Cloudinary URL
+  const { event_name, event_date, event_time, event_location, event_access, event_description, event_fees, event_capacity } = req.body;
+
+  try {
+    await eventInfoCollection.insertOne({
+      email: req.session.email,
+      eventName: event_name,
+      eventDate: event_date,
+      eventTime: event_time,
+      eventLocation: event_location,
+      eventAccess: event_access,
+      description: event_description,
+      eventFees: event_fees,
+      eventCapacity: event_capacity,
+      eventPicture: imageUrl
+    });
+
+    res.redirect('/events'); // Redirect to the events page after submission
+  } catch (error) {
+    console.error('Error updating event info:', error);
+    res.send("Failed to update event info.");
+  }
+});
+
+app.post('/editevent', async (req, res) => {
+  const loggedIn = req.session.authenticated;
+
+  const { event_name, event_date, event_time, event_location,
+    event_access, event_description, event_fees, event_capacity } = req.body;
+
+  await eventInfoCollection.updateOne(
+    {
+      email: req.session.email,
+      eventName: event_name
+    },
+    {
+      $set: {
+        eventName: event_name,
+        eventDate: event_date, eventTime: event_time,
+        eventLocation: event_location, eventAccess: event_access,
+        description: event_description, eventFees: event_fees, eventCapacity: event_capacity
+      }
+    }
+  );
+  res.render('pages/event_submitted', { loggedIn, currentPath: req.path });
+});
+
+app.post('/event_deletebutton', async (req, res) => {
+  const loggedIn = req.session.authenticated;
+  const { event_name, event_date, event_time, event_location,
+    event_access, event_description, event_fees, event_capacity } = req.body;
+
+  const result = await eventInfoCollection.deleteOne(
+    {
+      email: req.session.email,
+      eventName: event_name
+    },
+  );
+  if (result.deletedCount === 0) {
+    return res.status(404).send("No event found with the provided criteria");
+  }
+  res.render('pages/events', { loggedIn, currentPath: req.path });
+});
+
+app.post('/event_cancelbutton', (req, res) => {
+  const loggedIn = req.session.authenticated;
+  res.render('pages/events', { loggedIn, currentPath: req.path });
+});
+
 
 app.get('/matching', async (req, res) => {
   if (!req.session.authenticated) {
     res.redirect('/login');
     return;
   }
-  //const { email} = req.session.email;
+
   const hashedPassword = req.session.hashedPassword;
   let lowAge = +req.session.age - 5
   let highAge = +req.session.age + 5
@@ -466,10 +582,17 @@ app.get('/matching', async (req, res) => {
       age: { $gt: "" + lowAge, $lt: "" + highAge },
       email: { $ne: req.session.email },
     }).toArray();
+    const usersWithDefaultPics = matchuser.map(user => ({
+      ...user,
+      profilePicture: user.profilePicture || '/img/default-profile.png'
+    }));
 
     console.log("=========================");
     console.log(matchuser);
-    res.render("pages/matching", { users: matchuser, currentPath: req.path });
+    res.render("pages/matching", {
+      users: usersWithDefaultPics,
+      currentPath: req.path
+    });
 
   } catch (error) {
     res.status(500).send('Error accessing user data');
@@ -478,18 +601,211 @@ app.get('/matching', async (req, res) => {
 });
 
 app.post('/saveUser', async (req, res) => {
- 
-    const email = req.body.matchEmail;
-    console.log(email);
-    const query = { email: req.session.email };
-    const update = {
-      $push: { 
-          matchuser_email: email
-      }
+
+  const email = req.body.matchEmail;
+  console.log(email);
+  const query = { email: req.session.email };
+  const update = {
+    $push: {
+      matchuser_email: email
+    }
   };
-     await matchuserCollection.updateOne(query,update);
-     res.redirect('/matching');
+  await matchuserCollection.updateOne(query, update);
+  res.redirect('/matching');
+});
+
+app.post('/chattingnow', async (req, res) => {
+  if (!req.session.authenticated) {
+    res.redirect('/login');
+    return;
+  }
+  
+  const matchUserEmail = req.body.matchEmail;
+  const currentUserEmail = req.session.email
+
+  console.log(req.session.name);
+  // Update current user's matchuser_email array
+  const queryCurrentUser  = { email: req.session.email };
+  const updateCurrentUser  = {
+    $addToSet: {
+      matchuser_email: matchUserEmail
+    }
+  };
+
+  await matchuserCollection.updateOne(queryCurrentUser , updateCurrentUser );
+  // Update matched user's matchuser_email array
+  const queryMatchedUser = { email: matchUserEmail };
+  const updateMatchedUser = {
+    $addToSet: {
+      matchuser_email: currentUserEmail
+    }
+  };
+  await matchuserCollection.updateOne(queryMatchedUser, updateMatchedUser);
+  res.redirect('/chat');
 });
 
 
 
+
+// Socekt.io listener
+io.on("connection", (socket) => {
+  console.log("A user connected");
+
+  socket.on("join", ({ room, matchedUserEmail }) => {
+    socket.join(room);
+
+    console.log(`${matchedUserEmail} has joined ${room}!`);
+
+    const message = generateMessage(`${matchedUserEmail} has joined!`);
+    message.messageType = "received";
+    // socket.broadcast.to(room).emit("message", message);
+  });
+
+  socket.on("sendMessage", async (data) => {
+    console.log(
+      `Sender: ${data.sender} sent to room ${data.room}: ${data.message}`
+    );
+    const message = generateMessage(data.message);
+    message.sender = data.sender;
+    io.to(data.room).emit("message", message);
+
+    try {
+      // Store the message in MongoDB
+      message.room = data.room;
+
+      const result = await messagesCollection.insertOne(message);
+      console.log("Message stored in MongoDB with ID:", result.insertedId);
+    } catch (error) {
+      console.error("Error storing message in MongoDB:", error);
+    }
+  });
+
+  socket.on("disconnect", () => {
+    console.log("A user disconnected");
+  });
+
+  socket.on("leave", (room) => {
+    socket.leave(room);
+  });
+});
+
+// Route handler
+app.get("/chat", async (req, res) => {
+  if (!req.session.authenticated) {
+    res.redirect("/login");
+    return;
+  }
+  const userEmail = req.session.email;
+  const query = { email: userEmail };
+  const matched_user = await matchuserCollection.findOne(query);
+
+  const matched_users = matched_user.matchuser_email;
+  const users = [];
+  for (const user_email of matched_users) {
+    const current_user = await userCollection.findOne({ email: user_email });
+      if(current_user != null) {
+        if (!users.some((user) => user.email === current_user.email)) {
+          users.push(current_user);
+        }
+      }
+  }
+
+  if (matched_users == null || matched_users.length === 0) {
+    console.log("No matched user");
+    res.render("pages/chat-empty", {
+      currentPath: req.path,
+    });
+    return;
+  }
+
+  console.log("Fetching profile for email:", req.session.email);
+
+  try {
+    const userProfile = await userCollection.findOne({
+      email: req.session.email,
+    });
+    if (!userProfile) {
+      console.log("User profile not found for email:", req.session.email);
+      res.status(404).send("Profile not found");
+      return;
+    }
+
+    res.render("pages/chat", {
+      id: userProfile._id,
+      name: userProfile.name,
+      email: userProfile.email,
+      age: userProfile.age,
+      biography: userProfile.biography || "",
+      profilePicUrl: userProfile.profilePicUrl || "/img/default-profile.png",
+      currentPath: req.path,
+      currentUser: matched_user,
+      users: users,
+    });
+  } catch (error) {
+    console.error("Error fetching user profile:", error);
+    res.status(500).send("Failed to fetch profile.");
+  }
+});
+
+//Chat-empty
+app.get("/chat-empty", (req, res) => {
+  res.render("pages/chat-empty");
+});
+
+// Retrieve messages from DB and pass them to front
+app.get("/messages/:roomId", async (req, res) => {
+  const { roomId } = req.params;
+
+  try {
+    const messages = await messagesCollection.find({ room: roomId }).toArray();
+
+    // Send the retrieved messages as a JSON response
+    res.json(messages);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch messages" });
+  }
+});
+
+// Retrieve emails from DB by userIds
+app.get("/users/:userId", async (req, res) => {
+  const { userId } = req.params;
+  const _id = ObjectId(userId);
+  try {
+    const user = await userCollection.findOne({ _id: _id });
+    console.log(user.email);
+    
+    if (!user) {
+      return res.status(404).send({ message: 'User not found' });
+    }
+
+    res.status(200).send({ email: user.email });
+  } catch (error) {
+    res.status(500).send({ message: 'Error retrieving user', error });
+  }
+});
+
+
+// Delete user and messages from DB 
+app.delete('/matchusers/:email', async (req, res) => {
+  const email = req.params.email;
+  try {
+    const result = await matchuserCollection.updateMany(
+      {},
+      { $pull: { matchuser_email: email } }
+    );
+    if (result.modifiedCount === 0) {
+      return res.status(404).send({ message: 'Email not found in any user match list' });
+    }
+    res.status(200).send({ message: 'Email removed from match lists successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({ message: 'An error occurred while updating the user match lists' });
+  }
+
+});
+const generateMessage = (text) => {
+  return {
+    text,
+    createdAt: new Date().getTime(),
+  };
+};

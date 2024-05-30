@@ -1,5 +1,9 @@
 <%- include("../partials/header_after") %> 
 
+<link rel="stylesheet" href="/public/css/">
+
+<%- include("../partials/header_between") %> 
+
 <div class="profile-page-container">
   <div class="profile-container">
     <div class="profile-header">
@@ -21,6 +25,7 @@
     <div id="easter-egg" class="easter-egg">You're awesome!</div>
   </div>
 </div>
+<!-- <div class="bottomwhitespace"></div> -->
 
 <script>
   document.addEventListener('DOMContentLoaded', function() {
@@ -36,3 +41,5 @@
     });
   });
 </script>
+
+<%- include("../partials/footer", {currentPath: currentPath }) %> 

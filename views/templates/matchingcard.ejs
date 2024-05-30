@@ -2,33 +2,50 @@
     <div class="row">
         <div class="col-xl-6 col-lg-7 col-md-12">
             <div class="card profile-header">
-                <div class="body">
+                <div class="div_match body">
                     <div class="row">
-                        <div class="col-lg-4 col-md-4 col-12">
-                            <div class="profile-image float-md-right"> <img src="https://bootdey.com/img/Content/avatar/avatar7.png" alt=""> </div>
-                        </div>
+                        <div class="col-lg-4 col-md-4 col-12">    
+                            <div class="profile-image float-md-right"> 
+                                <img src="<%= matchuser.profilePicture %>" alt="Profile Picture" class="profile-picture" id="profile-picture"> 
+                            </div> <!-- profile -->
+                        </div> <!-- col-lg-4-->
                         <div class="col-lg-8 col-md-8 col-12">
-                            <h4 class="m-t-0 m-b-0"><strong> <%= matchuser.name %></strong></h4>
-                            <p>Age:<%= matchuser.age %></p>
-                            <p>Biography: <%= matchuser.biography %></p> 
-                            <p>Email: <%= matchuser.email %></p>
-                            <div>
-                                <form action="/saveUser" method="post">
-                                    <input type="hidden" name="matchEmail" value="<%= matchuser.email %>">
-                                    <button type="submit" class="btn btn-primary btn-round">Save for later</button>
-                                </form>
-                                <br>
-                                <button class="btn btn-primary btn-round btn-simple">Chatting now</button>
-                            </div>
-                            <p class="social-icon m-t-5 m-b-0">
-                                <a title="Twitter" href="javascript:void(0);"><i class="fa fa-twitter"></i></a>
-                                <a title="Facebook" href="javascript:void(0);"><i class="fa fa-facebook"></i></a>
-                                <a title="Google-plus" href="javascript:void(0);"><i class="fa fa-twitter"></i></a>
-                                <a title="Behance" href="javascript:void(0);"><i class="fa fa-behance"></i></a>
-                                <a title="Instagram" href="javascript:void(0);"><i class="fa fa-instagram "></i></a>
+                            <h4 class="m-t-0 m-b-0"><strong>
+                                    <%= matchuser.name %>
+                                </strong></h4>
+                            <p>Age:<%= matchuser.age %>
                             </p>
-                        </div>                
+                            <p>Biography: <%= matchuser.biography %>
+                            </p>
+                            <p>Email: <%= matchuser.email %>
+                            </p>
+                            <div class="div_match">
+                                <div>
+                                    <form action="/saveUser" method="post">
+                                        <input type="hidden" name="matchEmail" value="<%= matchuser.email %>">
+                                        <button type="submit" class="w-80 py-2 mybutton">Save for later</button>
+                                    </form>
+                                </div> <!-- form-->
+                                <div>
+                                    <form action="/chattingnow" method="post">
+                                        <input type="hidden" name="matchEmail" value="<%= matchuser.email %>">
+                                    <button class="w-85 py-2 mybutton">Chatting now</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                </div>                    
+                </div>
             </div>
         </div>
+                                </div> <!-- button-->
+                            </div> <!-- div match-->
+                        </div> <!-- col-lg-8-->
+                    </div><!-- row -->
+                </div> <!-- div_match body-->
+            </div> <!-- card-profile-header -->
+        </div> <!-- col-xl-6-->
+    </div><!-- row-->
+</div> <!-- container profile page -->
+    </div>
+</div>

@@ -1,7 +1,16 @@
 <%- include("../partials/header_after") %> 
+
+<link rel="stylesheet" href="/public/css/">
+
+<%- include("../partials/header_between") %> 
+
+<div class="upperwhitespace"></div>
+<br>
 <% let i=0; %>
          <% for(i=0; i < users.length; i++) { %>
           <%- include('../templates/matchingcard', {matchuser: users[i]})  %> 
       <% } %> 
-        
+<br> 
+<br>       
+<div class="bottomwhitespace"></div>
 <%- include("../partials/footer", {currentPath: currentPath }) %> 

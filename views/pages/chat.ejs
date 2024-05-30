@@ -1,0 +1,306 @@
+<%- include("../partials/header_after") %> 
+
+<link rel="stylesheet" href="/css/chat.css">
+
+<%- include("../partials/header_between") %>
+
+<div class="upperwhitespace"></div>
+
+<div class="container-fluid">
+  <div class="row">
+    <!-- Chat List -->
+    <div class="col-12 col-md-4 chat-list d-none d-md-block">
+      
+      <% users.forEach(user => { %>
+        <div class="chat-item">
+          <input type="checkbox" class="select-user d-none" data-user-id="<%= user._id %>">
+          <img
+            src="<%= user.profilePicture || '/img/default-profile.pngn' %>"
+            class="chat-avatar"
+            alt="Avatar"
+          />
+          <div class="chat-info" onclick="showChat(this, '<%= JSON.stringify(user) %>')">
+            <div class="chat-name"><%= user.name %></div>
+            <div class="chat-last-message">Last message from <%= user.name %></div>
+          </div>
+        </div>
+      <% }) %>
+      <div class="edit-container">
+        <button class="btn btn-secondary edit-btn" onclick="toggleEditOptions()">Edit</button>
+        <div class="edit-options d-none">
+          <button class="btn btn-primary pin-btn" onclick="pinToTop()">Pin to top</button>
+          <button class="btn btn-danger delete-btn" onclick="deleteSelectedUsers()">Delete</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chat Messages -->
+    <div class="col-12 col-md-8 chat-messages d-block">
+      <!-- Chat Header -->
+      <div
+        class="d-flex align-items-center p-3 border-bottom chat-header d-none"
+      >
+        <img
+          src="/img/default-profile.png"
+          class="chat-avatar message-avatar"
+          alt="Avatar"
+        />
+        <h5 class="ml-3 mb-0 chat-contact-name">Contact Name</h5>
+      </div>
+
+      <!-- Chat Body -->
+      <div
+        class="d-flex flex-column p-3 chat-body"
+        style="background-color: #f8f9fa; flex-grow: 1"
+      >
+        <!-- Initial Message -->
+        <div class="initial-message" style="text-align: center; margin: auto">
+          <img
+            src="/img/Favicon.png"
+            alt="Logo"
+            style="width: 100px; height: 100px"
+          />
+          <p>Link up to start conversation</p>
+        </div>
+
+        <!-- Messages -->
+        <div class="messages d-none">
+          <div class="message received">
+            Hello!
+            <span class="message-time">10:30 AM</span>
+          </div>
+          <div class="message sent">
+            Hi there!
+            <span class="message-time">10:32 AM</span>
+          </div>
+          <!-- Add more messages as needed -->
+        </div>
+      </div>
+
+      <!-- Chat Input -->
+      <div class="chat-footer d-none">
+        <div class="input-group">
+          <form id="message-form">
+            <input
+              type="text"
+              class="form-control"
+              placeholder="Type a message"
+              id="input"
+            />
+            <div class="input-group-append">
+              <button class="btn btn-primary" type="submit">Send</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Bootstrap JS and dependencies -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+
+<script>
+  let currentRoom = null;
+  const socket = io();
+
+  const current_id = "<%= id %>";
+  let contactUser = undefined;
+  let roomId = "";
+
+  function generateRoomId(userId1, userId2) {
+    return [userId1, userId2].sort().join("_");
+  }
+
+  async function showChat(element, userDataString) {
+    const user = JSON.parse(userDataString);
+    document.querySelector(".initial-message").classList.add("d-none");
+    document.querySelector(".messages").classList.remove("d-none");
+    document.querySelector(".chat-header").classList.remove("d-none");
+    document.querySelector(".chat-footer").classList.remove("d-none");
+    document.querySelector(".chat-contact-name").innerText = user.name;
+    document.querySelector(".message-avatar").src =
+      user.profilePicture || "https://via.placeholder.com/50";
+    contactUser = user;
+    // Clear previous messages
+    document.querySelector(".messages").innerHTML = "";
+
+    roomId = generateRoomId(contactUser._id, current_id);
+    console.log(user.email);
+    socket.emit("join", { room: roomId, matchedUserEmail: user.email });
+
+    const messages = await fetchMessages(roomId);
+  }
+
+  const $messagesContainer = document.querySelector(".messages");
+
+  document.querySelector("#message-form").addEventListener("submit", (e) => {
+    e.preventDefault();
+
+    const input = document.querySelector("#input");
+    // Get message text
+    let msg = input.value;
+
+    msg = msg.trim();
+
+    if (!msg) {
+      return false;
+    }
+    // Emit message to server
+    let senderEmail = "<%= email %>";
+
+    socket.emit("sendMessage", {
+      room: roomId,
+      message: msg,
+      sender: "<%= email %>",
+    });
+    // Clear input
+    input.value = "";
+    input.focus();
+  });
+
+  function addMessage(text, type, time) {
+    const messageElement = document.createElement("div");
+    messageElement.classList.add("message", type);
+    messageElement.textContent = text;
+
+    const timeElement = document.createElement("span");
+    timeElement.classList.add("message-time");
+    
+    timeElement.textContent = formatTimestamp(time);
+
+    messageElement.appendChild(timeElement);
+    $messagesContainer.appendChild(messageElement);
+  }
+
+  function formatTimestamp(timestamp) {
+  const date = new Date(timestamp);
+  const hours = date.getHours();
+  const minutes = date.getMinutes();
+  const ampm = hours >= 12 ? 'PM' : 'AM';
+  const formattedHours = hours % 12 || 12; // Convert to 12-hour format
+  const formattedMinutes = minutes < 10 ? '0' + minutes : minutes; // Add leading zero if needed
+  return `${formattedHours}:${formattedMinutes} ${ampm}`;
+}
+
+  async function fetchMessages(roomId) {
+    const url = `/messages/${roomId}`;
+    console.log(`Fetching messages from URL: ${url}`); // Log the URL
+    try {
+      const response = await fetch(`/messages/${roomId}`);
+      const messages = await response.json();
+      messages.forEach((message) => {
+        const messageType =
+          message.sender === "<%= email %>" ? "sent" : "received";
+        addMessage(message.text, messageType, message.createdAt);
+      });
+    } catch (error) {
+      console.error("Failed to fetch messages:", error);
+      return [];
+    }
+  }
+
+  function toggleEditOptions() {
+    const editOptions = document.querySelector(".edit-options");
+    const selectUserCheckboxes = document.querySelectorAll(".select-user");
+
+    editOptions.classList.toggle("d-none");
+    selectUserCheckboxes.forEach(checkbox => {
+      checkbox.classList.toggle("d-none");
+    });
+  }
+
+  function pinToTop() {
+    const selectedCheckbox = document.querySelector(".select-user:checked");
+    if (selectedCheckbox) {
+      const userId = selectedCheckbox.dataset.userId;
+      const userElement = selectedCheckbox.closest(".chat-item");
+      const chatList = document.querySelector(".chat-list");
+      chatList.insertBefore(userElement, chatList.firstChild);
+    }
+  }
+
+  async function deleteSelectedUsers() {
+    const deletedUsers = [];
+    
+    const selectedCheckboxes = document.querySelectorAll(".select-user:checked");
+    const userIds = Array.from(selectedCheckboxes).map(checkbox => checkbox.dataset.userId);
+    console.log(userIds);
+    const deletedEmails = await fetchEmails(userIds)
+    console.log(deletedEmails);
+    await deleteUsers(deletedEmails)
+    selectedCheckboxes.forEach(checkbox => {
+      const userElement = checkbox.closest(".chat-item");
+      userElement.remove();
+      
+    });
+  }
+
+  async function fetchEmails(userIds){
+    const emails = []
+    for (const userId of userIds){
+      const url = `/users/${userId}`;
+      try{
+        const response = await fetch(url, {
+          method: 'GET'
+        });
+
+        if(!response.ok) {
+          throw new Error(`Failed to fetch user emails with user id: ${userId}`);
+        }
+        
+
+        const data = await response.json();
+        // console.log(data);
+        emails.push(data.email);
+      }
+      catch (error){
+        console.error('Error fetching emails:', error);
+        return [];
+
+      }
+    }
+    console.log(emails);
+    return emails;
+  }
+
+  async function deleteUsers(emails) {
+    for (const email of emails) {
+    const url = `/matchusers/${email}`;
+    try {
+      const response = await fetch(url, {
+        method: 'DELETE'
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to delete user with email: ${email}`);
+      }
+
+      console.log(`Successfully deleted user with email: ${email}`);
+    } catch (error) {
+      console.error(error.message);
+    }
+  }
+  }
+
+
+  socket.on("connect", () => {
+    console.log("Connected to server");
+  });
+
+  socket.on("disconnect", () => {
+    console.log("Disconnected from server");
+  });
+
+  socket.on("message", (message) => {
+    const messageType = message.sender === "<%= email %>" ? "sent" : "received";
+
+    
+    addMessage(message.text, messageType, message.createdAt);
+  });
+</script>
+
+<%- include("../partials/footer", {currentPath: currentPath }) %>
