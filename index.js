@@ -492,7 +492,36 @@ app.get('/event_edit', async (req, res) => {
     res.redirect('/login');
     return;
   }
-  res.render('pages/event_edit', { currentPath: req.path });
+  // const event = await eventInfoCollection.findOne(
+  //   {
+  //     email: req.session.email,
+  //   });
+  res.render('pages/event_edit', { currentPath: req.path, eventName: req.query.eventName, eventDate: req.query.eventDate, eventTime: req.query.eventTime,eventLocation:req.query.eventLocation,description:req.query.description });
+});
+
+app.post('/editevent',parser.single('event_picture'), async (req, res) => {
+  const loggedIn = req.session.authenticated;
+  const imageUrl = req.file.path; // Cloudinary URL
+  const { event_name, event_date, event_time, event_location,
+    event_access, event_description, event_fees, event_capacity } = req.body;
+
+  await eventInfoCollection.updateOne(
+    {
+      email: req.session.email,
+      eventName: event_name
+    },
+    {
+      $set: {
+        eventName: event_name,
+        eventDate: event_date, eventTime: event_time,
+        eventLocation: event_location, eventAccess: event_access,
+        description: event_description, eventFees: event_fees, eventCapacity: event_capacity,
+        eventPicture: imageUrl || ''
+      }
+    }
+  );
+  const events = await eventInfoCollection.find().toArray();
+  res.render('pages/event_all', { loggedIn, currentPath: req.path,events: events });
 });
 
 
@@ -512,7 +541,7 @@ app.post('/submitEvent', parser.single('event_picture'), async (req, res) => {
       description: event_description,
       eventFees: event_fees,
       eventCapacity: event_capacity,
-      eventPicture: imageUrl
+      eventPicture: imageUrl || ''
     });
 
     res.redirect('/events'); // Redirect to the events page after submission
@@ -522,7 +551,7 @@ app.post('/submitEvent', parser.single('event_picture'), async (req, res) => {
   }
 });
 
-app.post('/view_event', async (req, res) => {
+app.post('/view_event/:eventId', async (req, res) => {
   const loggedIn = req.session.authenticated;
   const eventId = req.body.eventId;
   console.log(eventId);
@@ -534,36 +563,13 @@ app.get('/myevent', async (req, res) => {
   const loggedIn = req.session.authenticated;
  // const { eventId } = req.params;
   const email = req.session.email;
-  const event = await eventInfoCollection.findOne({
+  const event = await eventInfoCollection.find({
     email: email,
-  });
-;
+  }).toArray();
   console.log(event);
-  res.render('pages/event_view', {loggedIn, currentPath: req.path, event: event})
+  res.render('pages/myevents', {loggedIn, currentPath: req.path, event: event})
 });
 
-app.post('/editevent', async (req, res) => {
-  const loggedIn = req.session.authenticated;
-
-  const { event_name, event_date, event_time, event_location,
-    event_access, event_description, event_fees, event_capacity } = req.body;
-
-  await eventInfoCollection.updateOne(
-    {
-      email: req.session.email,
-      eventName: event_name
-    },
-    {
-      $set: {
-        eventName: event_name,
-        eventDate: event_date, eventTime: event_time,
-        eventLocation: event_location, eventAccess: event_access,
-        description: event_description, eventFees: event_fees, eventCapacity: event_capacity
-      }
-    }
-  );
-  res.render('pages/event_all', { loggedIn, currentPath: req.path });
-});
 
 app.post('/event_deletebutton', async (req, res) => {
   const loggedIn = req.session.authenticated;
@@ -579,12 +585,12 @@ app.post('/event_deletebutton', async (req, res) => {
   if (result.deletedCount === 0) {
     return res.status(404).send("No event found with the provided criteria");
   }
-  res.render('pages/events', { loggedIn, currentPath: req.path });
+  res.redirect('/events');
 });
 
 app.post('/event_cancelbutton', (req, res) => {
   const loggedIn = req.session.authenticated;
-  res.render('pages/events', { loggedIn, currentPath: req.path });
+  res.redirect('/events');
 });
 
 
