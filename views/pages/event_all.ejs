@@ -1,0 +1,36 @@
+<%- include("../partials/header_after") %>
+<link rel="stylesheet" href="/css/event_all.css">
+
+<%- include("../partials/header_between") %> 
+
+<div class="upperwhitespace"></div>
+
+
+  <div class="container">
+    <div class="header">
+      <h2>All Events</h2>
+      <span class="material-symbols-outlined" id="filtericon">
+        tune
+      </span>
+    </div>
+    <div id="event-container">
+      <% let i=0; %>
+      <% for(i=0; i < events.length; i++) { %>
+      <%- include('../templates/eventtemplate', {events: events[i], num: i})  %> 
+      <% } %> 
+    </div>
+    <div id="addeventbtn">
+      <span class="material-symbols-outlined" id="circle">
+        radio_button_unchecked
+      </span>
+          <a href="/event_creation" style="text-decoration: none; color: inherit;">
+            <span class="material-symbols-outlined" id="plus">
+              add            
+            </span>
+          </a>
+    </div>
+
+    <div class="bottomwhitespace"></div>
+  </div>
+
+  <%- include("../partials/footer", {currentPath: currentPath }) %>

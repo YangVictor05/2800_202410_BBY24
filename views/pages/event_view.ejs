@@ -1,0 +1,74 @@
+<%- include("../partials/header_after") %> 
+
+<link rel="stylesheet" href="/css/event_view.css">
+
+<div class="upperwhitespace"></div>
+
+<%- include("../partials/header_between") %> 
+<%= console.log(event) %>
+<div class="container">
+  <div class="header">
+    <button class="backbtn">
+      <a href="/events" style="text-decoration: none; color: inherit;">
+      <span class="material-symbols-outlined" id="backbtn">
+        arrow_back_ios
+      </span>
+     </a>
+    </button>
+    <h1><a href="/events">Back to events</a></h1>
+
+  </div>
+
+  <div class="eventcardbody">
+    <div class="top">
+      <img src="<%=event.eventPicture %>" alt="..." class="event_picture" onerror="this.onerror=null; this.src='/img/defaulteventpic.png'">
+      <div class="event_details">
+        <h3 class="event_title"><%=event.eventName %></h5>
+          <h5 class="event_access"><%=event.eventAccess %></h5>
+          <div class="date">
+            <span class="material-symbols-outlined" id="calendar">
+              event
+            </span>
+            <h4 class="event_date"><%=event.eventDate %></h4>
+          </div>
+          <div class="time">
+            <span class="material-symbols-outlined" id="clock">
+              schedule
+            </span>
+            <h4 class="event_time"><%=event.eventTime %></h4>
+          </div>
+          <div class="location">
+            <span class="material-symbols-outlined" id="locationpin">
+              location_on
+            </span>
+            <h4 class="event_location"><%=event.eventLocation %></h4>
+          </div>
+          <div class="buttons">
+            <button class="registerbtn">Register</button>
+            <button class="bookmarkbtn">
+              <span class="material-symbols-outlined" id="share">
+                bookmark
+              </span>
+            </button>
+          </div>
+      </div>
+    </div>
+    <div class="bottom">
+      <p>Hosted by</p>
+      <div class="host">
+        <img src="..." alt="..." class="host_picture" onerror="this.onerror=null; this.src='/public/img/defaultprofilepic.png'">
+        <a href="..." class="event_host"><%=event.email %></a>
+      </div>
+      <p>About</p>
+      <h4 class="event_description"><%=event.description %></h4>
+      <p>Fees</p>
+      <h4 class="event_fees"><%=event.eventFees %></h4>
+      <p>Seats or Capacity</p>
+      <h4 class="event_capacity"><%=event.eventCapacity %></h4>
+    </div>
+  </div>
+
+  <div class="bottomwhitespace"></div>
+</div>
+
+<%- include("../partials/footer", {currentPath: currentPath }) %> 

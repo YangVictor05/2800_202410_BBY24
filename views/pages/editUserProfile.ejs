@@ -1,0 +1,31 @@
+<%- include("../partials/header_after") %> 
+<link rel="stylesheet" href="/public/css/">
+<%- include("../partials/header_between") %> 
+
+<div class="profile-page-container">
+  <div class="profile-container">
+    <h1 class="profile-name">Edit Your Profile</h1>
+    <form action="/updateProfile" method="post" class="edit-profile-form">
+      <div class="form-group">
+        <label for="name">Name:</label>
+        <input type="text" name="name" id="name" value="<%= name %>" class="form-input"/>
+      </div>
+      <div class="form-group">
+        <label for="email">Email (not editable):</label>
+        <input type="email" name="email" id="email" value="<%= email %>" readonly class="form-input"/>
+      </div>
+      <div class="form-group">
+        <label for="age">Age:</label>
+        <input type="number" name="age" id="age" value="<%= age %>" class="form-input"/>
+      </div>
+      <div class="form-group">
+        <label for="biography">Biography:</label>
+        <textarea name="biography" id="biography" rows="4" cols="50" class="form-textarea"><%= biography %></textarea>
+      </div>
+      <button type="submit" class="save-button">Save Changes</button>
+    </form>
+    <a href="/profile" class="cancel-link">Cancel</a>
+  </div>
+</div>
+
+<div class="bottomwhitespace"></div>

@@ -1,0 +1,29 @@
+* {
+  font-family: "Quicksand", sans-serif;
+  font-style: normal;
+}
+
+.content {
+  display: grid;
+  justify-content: center;
+  align-items: center;
+  margin-top: 40vh;
+}
+
+form {
+  display: grid;
+  justify-content: center;
+  align-items: center;
+
+}
+.backbutton {
+  display: grid;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+  background-color: #3C9EA1;
+  color: white;
+  border-style: none;
+  padding: 8px 15px;
+  border-radius: 5px;
+}

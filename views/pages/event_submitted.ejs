@@ -1,0 +1,12 @@
+<%- include("../partials/header_after") %> 
+<link rel="stylesheet" href="/css/event_submitted.css">
+
+<%- include("../partials/header_between") %> 
+<div class="content">
+  Your event has been created successfully!
+  <form action="/event_my" method="GET">
+    <button type="button" class="backbutton">Back to my events</button>
+  </form>
+</div>
+<div class="bottomwhitespace"></div>
+<%- include("../partials/footer", {currentPath: currentPath }) %> 

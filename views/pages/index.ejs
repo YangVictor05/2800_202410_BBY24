@@ -1,0 +1,26 @@
+<%- include("../partials/header_after") %> 
+<link rel="stylesheet" href="/css/index.css">
+
+<%- include("../partials/header_between") %> 
+
+<div class="upperwhitespace"></div>
+
+<!-- <h1>Hello</h1> -->
+<div id="event-container">
+    <% let i=0; %>
+        <% for(i=0; i < 1; i++) { %>
+        <%- include('../templates/eventcard', {events: event[i]})  %> 
+    <% } %> 
+</div>
+<h2>Saved users</h2>
+<div id="people">
+    <% if (users.length > 0) { %>
+        <% for(i=0; i < Math.min(users.length, 3); i++) { %>
+            <%- include('../templates/recentcard', {saveduser: users[i]})  %> 
+        <% } %> 
+      <% } else { %>
+      <% } %>
+</div>
+<div class="bottomwhitespace"></div>
+
+<%- include("../partials/footer", {currentPath: currentPath }) %> 

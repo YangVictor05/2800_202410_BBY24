@@ -1,0 +1,31 @@
+<%- include("../partials/header_after") %>
+
+  <link rel="stylesheet" href="/css/event_view.css">
+  <link rel="stylesheet" href="/css/event_all.css">
+
+  <div class="upperwhitespace"></div>
+
+  <%- include("../partials/header_between") %>
+  
+  <div class="container">
+    <div class="backtoevent">
+      <button class="backbtn">
+        <a href="/events" style="text-decoration: none; color: inherit;">
+          <span class="material-symbols-outlined" id="backbtn">
+            arrow_back_ios
+          </span>
+        </a>
+      </button>
+      <h1><a href="/events">Back to events</a></h1>
+    </div>
+  
+    <% let i=0; %>
+    <% for(i=0; i < event.length; i++) { %>
+      <%- include('../templates/myevent', {event: event[i]}) %>
+    <% } %>
+  </div> <!-- Closing tag for "container" div -->
+  
+  <div class="bottomwhitespace"></div>
+ 
+  <%- include("../partials/footer", {currentPath: currentPath }) %>
+  

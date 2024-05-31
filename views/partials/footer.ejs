@@ -1,0 +1,31 @@
+    <footer id="footer">
+        <a href="/home">
+            <span class="material-symbols-outlined <%= currentPath === '/home' ? 'active' : '' %>" id="homepage">
+                home
+            </span>
+        </a>
+        <a style="padding-top: 0.1vh;"  href="/matching">
+            <span class="material-symbols-outlined">
+                <img src="<%= currentPath === '/matching' ? '/img/Linkup_navicon.png' : '/img/Linkup_navicon_inactive.png' %>" id="linkupicon" alt="LinkUp icon">
+            </span>
+        </a>
+        <a href="/chat">
+            <span class="material-symbols-outlined <%= currentPath === '/chat' ? 'active' : '' %>">
+                sms
+            </span>        
+        </a>
+        <a href="/events">
+           <span class="material-symbols-outlined <%= currentPath === '/events' ? 'active' : '' %>">
+                calendar_clock
+            </span>
+        </a>
+        <a href="/profile">
+            <span class="material-symbols-outlined <%= currentPath === '/profile' ? 'active' : '' %>" id="profile">
+                person
+            </span>
+        </a>
+    </footer>
+</body>
+</html>
+
+
