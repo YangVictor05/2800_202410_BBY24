@@ -20,6 +20,7 @@ We are creating an app called LinkUp to connect people locally to create a stron
 - **Other Tech Tools:** No
 
 ## Listing of File Contents
+```
 Linkup/
 │
 ├── node_modules/
@@ -86,7 +87,6 @@ Linkup/
 │   │   ├── matchingcard.ejs
 │   │   ├── myevent.ejs
 │   │   ├── recentcard.ejs
-```
 ```
 
 ## How to Install or Run the Project
