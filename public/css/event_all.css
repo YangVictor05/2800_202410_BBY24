@@ -6,6 +6,7 @@
 .container {
   display: grid;
   justify-content: center;
+  height: fit-content;
   /* margin-left: 10%;
   margin-right: 10%; */
   /* margin-top: 60px; */
@@ -86,6 +87,7 @@ input::file-selector-button {
   padding-left: 5%;
   display: flex;
   align-items: center;
+  margin: auto;
   border: 2px solid #3C9EA1;
   border-radius: 15px;
   height: 25vh;
@@ -152,6 +154,7 @@ h5 {
   overflow: hidden;
 }
 
+
 .bottomwhitespace {
   height: 100px;
 }
@@ -163,7 +166,7 @@ h5 {
 .editbtn {
   border: none;
   background-color: transparent;
-  visibility: visible;
+  visibility: visible; /* change to visibility: hidden; when user is NOT the host of the event*/
   position: absolute;
   right: 17%;
 }
