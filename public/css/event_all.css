@@ -78,9 +78,14 @@ h2 {
   font-size: 23px;
 }
 
+.backtoevent {
+  display: flex;
+  align-items: center;
+}
+
 .header {
   display: flex;
-  /* justify-content: space-between; */
+  justify-content: space-between;
   align-items: center;
   position: relative;
   padding-left: 10px;
