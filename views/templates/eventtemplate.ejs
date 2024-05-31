@@ -1,4 +1,4 @@
-<div class="eventcardbody" style="position: relative;">
+<div class="eventcardbody">
   <!-- Use a unique form id for each card -->
   <form id="myForm<%= num%>" action="/view_event/:eventId" method="post" style="display: none;">
     <input type="hidden" name="eventId" value="<%=events._id%>">
@@ -10,7 +10,14 @@
   <img src="<%= events.eventPicture%>" alt="..." class="event_picture"
     onerror="this.onerror=null; this.src='/img/defaulteventpic.png'">
   <div class="event_details">
-   
+    <div class="editbtn">
+      <a
+        href="/event_edit?eventName=<%= events.eventName %>&eventDate=<%= events.eventDate %>&eventTime=<%= events.eventTime %>&eventLocation=<%= events.evenLocation %>&description=<%= events.description %>">
+        <span class="material-symbols-outlined" id="editicon">
+          edit_square
+        </span>
+      </a>
+    </div>
     <h3 class="event_title">
       <%= events.eventName %>
         </h5>
@@ -39,16 +46,9 @@
           <%= events.description %>
         </h4>
   </div>
+  
 </div>
-  <div>
-    <a href="/event_edit?eventName=<%= events.eventName %>&eventDate=<%= events.eventDate %>&eventTime=<%= events.eventTime %>&eventLocation=<%= events.evenLocation %>&description=<%= events.description %>">
-     
-        <span class="material-symbols-outlined editbtn" id="editicon">
-          edit_square
-        </span>
-     
-    </a>
-   </div>
+
 
 </div>
 
