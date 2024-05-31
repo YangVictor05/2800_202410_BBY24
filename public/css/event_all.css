@@ -113,6 +113,7 @@ h2 {
   height: 21vh;
   width: 40%;
   object-fit: cover;
+  align-self: center;
 }
 
 #locationpin, #calendar, #clock {
