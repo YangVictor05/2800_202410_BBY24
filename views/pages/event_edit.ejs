@@ -4,21 +4,21 @@
 <%- include("../partials/header_between") %> 
 <div class="content">
   <h1>Edit your event</h1>
-  <form action="/editevent" method="post">
+  <form action="/editevent" method="post" enctype="multipart/form-data">
     <label for="event_picture">Upload a picture for your event</label> <br>
     <input type="file" id="event_picture" name="event_picture" accept="image/*">
     
     <label for="event_title">Event Title:</label> <br>
-    <input type="text" id="event_name" name="event_name" required>
+    <input type="text" id="event_name" name="event_name" value="<%= eventName %>" required>
     
     <label for="event_date">Date:</label>
-    <input type="date" id="event_date" name="event_date" required>
+    <input type="date" id="event_date" name="event_date" value="<%= eventDate %>" required>
     
     <label for="event_time">Time:</label>
-    <input type="time" id="event_time" name="event_time" required>
+    <input type="time" id="event_time" name="event_time" value="<%= eventTime %>" required>
     
     <label for="event_location">Location:</label>
-    <input type="text" id="event_location" name="event_location" required>
+    <input type="text" id="event_location" name="event_location" value="<%= eventLocation %>" required>
     
     <label for="event_access">Access:</label>
     <select id="event_access" name="event_access" onfocus='this.size=4;' onblur='this.size=0;' 
@@ -30,13 +30,13 @@
     </select>
 
     <label for="event_description">Description:</label>
-    <textarea id="event_description" name="event_description" required></textarea>
+    <textarea id="event_description" name="event_description"  value="<%= description %>" required></textarea>
     
     <label for="event_fees">Fee:</label>
-    <input type="number" id="event_fees" name="event_fees" min="0.00" max="10000.00" step="any">
+    <input type="number" id="event_fees" name="event_fees"  value="0" min="0.00" max="10000.00" step="any">
     
     <label for="event_capacity">Seats or capacity:</label>
-    <input type="number" id="event_capacity" name="event_capacity">
+    <input type="number" id="event_capacity" name="event_capacity"  value="capacity">
 
     <button class="edit" type="submit">Edit Event</button>
     </form>
@@ -46,6 +46,7 @@
     </form>
   
   <form action="/event_deletebutton" method="post">
+    <input type="hidden" name="event_name"  value="<%= eventName %>">
     <input type="submit" value="Delete Event" class="delete">
   </form>
 </div>
