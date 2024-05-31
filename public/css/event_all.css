@@ -73,6 +73,11 @@ input::file-selector-button {
   border-color: transparent;
 }
 
+h2 {
+  color: #3C9EA1;
+  font-size: 23px;
+}
+
 .header {
   display: flex;
   justify-content: space-between;
